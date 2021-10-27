@@ -6,8 +6,9 @@
 4) Endpoints: groups, members, albums
 
 	Example for albums:
-	GET all http://localhost:5000/api/albums
-	GET id  http://localhost:5000/api/albums/id
-	POST    http://localhost:5000/api/albums
-	PUT     http://localhost:5000/api/albums/id
-	DELETE  http://localhost:5000/api/albums/id
+	
+		1) GET all http://localhost:5000/api/albums
+		2) GET id  http://localhost:5000/api/albums/id
+		3) POST    http://localhost:5000/api/albums
+		4) PUT     http://localhost:5000/api/albums/id
+		5) DELETE  http://localhost:5000/api/albums/id
