@@ -8,7 +8,7 @@ const Album = new mongoose.Schema({
 	GroupID: {type: String, required: true},
 	Name: {type: String, required: true},
 	Photo: {type: String, required: true},
-	ReleseDate: {type: Date, required: true},
+	ReleseDate: {type: String, required: true},
 	Country: {type: String, required: true},
 	Awards: {type: String, required: true},
 	TrackList: {type: Array, required: true},
