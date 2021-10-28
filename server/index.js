@@ -1,18 +1,19 @@
-import cors from "cors";
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
+import fileUpload from "express-fileupload";
 
-import albumRouter from "./routers/album-router.js";
 import groupRouter from "./routers/group-router.js";
 import memberRouter from "./routers/member-router.js";
-
+import albumRouter from "./routers/album-router.js";
 
 const PORT = 5000;
-const DB_URL = "mongodb+srv://kkazlov:xbsoftware@cluster0.v5mkn.mongodb.net/firstdb";
+const DB_URL = `mongodb+srv://kkazlov:xbsoftware@cluster0.v5mkn.mongodb.net/firstdb`;
 const app = express();
 
-app.use(express.json({limit: "16mb", extended: true}));
-app.use(express.urlencoded({limit: "16mb", extended: false}));
+app.use(express.json());
+app.use(express.static("static"));
+app.use(fileUpload({}));
 app.use(cors());
 
 app.use("/api", groupRouter);
@@ -28,8 +29,7 @@ async function startApp() {
 		app.listen(PORT, () => {
 			console.log("server is running...");
 		});
-	}
-	catch (error) {
+	} catch (error) {
 		console.log(error);
 	}
 }

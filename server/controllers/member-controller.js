@@ -37,7 +37,7 @@ class memberController {
             const updatedMember = await memberService.update(member);
             return res.json(updatedMember);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 

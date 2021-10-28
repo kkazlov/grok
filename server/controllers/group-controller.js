@@ -37,7 +37,7 @@ class groupController {
             const updatedGroup = await groupService.update(group);
             return res.json(updatedGroup);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 

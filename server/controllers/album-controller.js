@@ -4,10 +4,10 @@ import albumService from "../services/album-service.js";
 class albumController {
     async create(req, res) {
         try {
-            const album = await albumService.create(req.body);
+            const album = await albumService.create(req.body, req.files);
             res.json(album);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 
@@ -16,7 +16,7 @@ class albumController {
             const albums = await albumService.getAll();
             return res.json(albums);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 
@@ -27,7 +27,7 @@ class albumController {
             return res.json(album);
 
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         } 
     }
 
@@ -37,7 +37,7 @@ class albumController {
             const updatedAlbum = await albumService.update(album);
             return res.json(updatedAlbum);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 
@@ -47,7 +47,7 @@ class albumController {
             const album = await albumService.delete(id);
             return res.json(album);
         } catch (error) {
-            res.status(500).json(error);
+            res.status(500).json(error.message);
         }
     }
 }
