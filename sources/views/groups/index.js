@@ -2,6 +2,7 @@ import {JetView} from "webix-jet";
 
 import albumsDB from "../../models/albumsDB";
 import groupsDB from "../../models/groupsDB";
+import Popup from "./popup";
 
 export default class Groups extends JetView {
 	config() {
@@ -13,12 +14,18 @@ export default class Groups extends JetView {
 					view: "button",
 					id: "LoadBut",
 					value: "Export to excel",
-					width: 200
+					width: 200,
+					click: () => {
+						webix.toExcel(this.$$("table"));
+					}
 				},
 				{
 					view: "button",
 					value: "Refresh",
-					width: 200
+					width: 200,
+					click: () => {
+						this.$$("table").refresh();
+					}
 				}
 			]
 		};
@@ -26,6 +33,7 @@ export default class Groups extends JetView {
 		const Table = {
 			view: "datatable",
 			localId: "table",
+			select: true,
 			columns: [
 				{
 					id: "Name",
@@ -67,29 +75,28 @@ export default class Groups extends JetView {
 					header: ["Country", {content: "textFilter"}],
 					fillspace: 3,
 					sort: "string"
-				},
-				{
-					id: "edit",
-					header: "",
-					template: "{common.editIcon()}",
-					css: "table-icon",
-					fillspace: 1,
-					sort: "string"
 				}
 			],
-			css: "webix_data_border webix_header_border table-custom"
+			css: "webix_data_border webix_header_border"
 		};
 
-		return {rows: [Toolbar, Table]};
+		return {localId: "layout", rows: [Toolbar, Table]};
 	}
 
 	init() {
+		this._popup = this.ui(Popup);
 		const table = this.$$("table");
+		const layout = this.$$("layout");
+
 		table.showOverlay("Loading...");
 
 		albumsDB.waitData.then(() => {
 			table.parse(groupsDB);
 			table.hideOverlay();
+		});
+
+		this.on(table, "onAfterSelect", ({id}) => {
+			this._popup.showWindow(id, table, layout);
 		});
 	}
 

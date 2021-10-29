@@ -1,4 +1,4 @@
-.table-custom [aria-rowindex]:nth-child(odd) {
+/* .table-custom [aria-rowindex]:nth-child(odd) {
 	background: #f0f0f0;
 }
 
@@ -9,7 +9,7 @@
 .table-icon span {
 	cursor: pointer;
 
-}
+} */
 
 .webix_cell {
 	text-overflow: ellipsis;
