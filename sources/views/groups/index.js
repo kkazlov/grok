@@ -27,11 +27,29 @@ export default class Groups extends JetView {
 			view: "datatable",
 			localId: "table",
 			columns: [
-				{id: "Name", header: "Groups name", fillspace: 3, sort: "string"},
-				{id: "Style", header: "Music style", fillspace: 3, sort: "string"},
+				{
+					id: "Name",
+					header: ["Groups name", {content: "textFilter"}],
+					fillspace: 3,
+					sort: "string"
+				},
+				{
+					id: "Style",
+					header: ["Music style", {content: "textFilter"}],
+					fillspace: 3,
+					sort: "string"
+				},
 				{
 					id: "Tracks",
-					header: "Number of tracks",
+					header: [
+						"Number of tracks",
+						{
+							content: "textFilter",
+							compare: (value, filter, obj) => this.trackCounter(obj)
+								.toString()
+								.indexOf(filter) === 0
+						}
+					],
 					fillspace: 3,
 					collection: albumsDB,
 					template: obj => this.trackCounter(obj),
@@ -39,12 +57,17 @@ export default class Groups extends JetView {
 				},
 				{
 					id: "Date",
-					header: "Creation date",
+					header: ["Creation date", {content: "datepickerFilter"}],
 					fillspace: 3,
 					format: value => webix.i18n.longDateFormatStr(value),
 					sort: "date"
 				},
-				{id: "Country", header: "Country", fillspace: 3, sort: "string"},
+				{
+					id: "Country",
+					header: ["Country", {content: "textFilter"}],
+					fillspace: 3,
+					sort: "string"
+				},
 				{
 					id: "edit",
 					header: "",
@@ -70,9 +93,9 @@ export default class Groups extends JetView {
 		});
 	}
 
-	trackCounter(obj) {
+	trackCounter(group) {
 		const collection = this.$$("table").config.columns[2].collection;
-		const albumsArr = collection.find(o => o.GroupID === obj.id);
+		const albumsArr = collection.find(album => album.GroupID === group.id);
 		let trackCounter = 0;
 		albumsArr.forEach((item) => {
 			trackCounter += item.TrackList.length;
