@@ -12,10 +12,7 @@ export default class Members extends JetView {
 				{id: "BirthDate", header: "Birth Date", fillspace: 1},
 				{id: "Country", header: "Country", fillspace: 1},
 				{id: "Awards", header: "Awards", fillspace: 1}
-			],
-			datathrottle: 500,
-			datafetch: 20
-			/* url: "http://localhost:5000/api/members" */
+			]
 		};
 	}
 

@@ -1,6 +1,6 @@
-import * as uuid from "uuid";
-import path from "path";
 import {unlink} from "fs/promises";
+import path from "path";
+import * as uuid from "uuid";
 
 
 class FileService {
@@ -13,8 +13,9 @@ class FileService {
 			const filePath = path.resolve("static", fileName);
 			file.mv(filePath);
 			return fileName;
-		} catch (error) {
-			console.log(error.message)
+		}
+		catch (error) {
+			console.log(error.message);
 		}
 	}
 
@@ -24,13 +25,11 @@ class FileService {
 				const filePath = path.resolve("static", name);
 				await unlink(filePath);
 			}
-			
-		} catch (error) {
-			console.log(error.message)
 		}
-		
+		catch (error) {
+			console.log(error.message);
+		}
 	}
-
 }
 
 export default new FileService();
