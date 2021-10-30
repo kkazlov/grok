@@ -13,9 +13,10 @@ class MemberController {
 
 	async getAll(req, res) {
 		try {
-			const {start = 0, count = 50, filter = {}} = req.query;
+			const {start = 0, count = 50, filter = {}, sort = {}} = req.query;
 			const members = await MemberService.getAll();
 			const totalCount = members.length;
+
 
 			let dataChunk = [];
 			const check = i => i < count && (+start + i) < totalCount;
@@ -32,6 +33,34 @@ class MemberController {
 				if (filter[key]) {
 					dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
 					chunkLength = dataChunk.length;
+				}
+			});
+
+			const sortKeys = Object.keys(sort);
+			sortKeys.forEach((key) => {
+				if (sort[key]) {
+					/* dataChunk = dataChunk.sort((a, b) => {
+						if (sort[key] === "asc") {
+							console.log(a[key].toLowerCase() - b[key].toLowerCase())
+							return a[key].toLowerCase() - b[key].toLowerCase();
+						}
+						return b[key].toLowerCase() - a[key].toLowerCase();
+					}); */
+					dataChunk.sort((a, b) => {
+						const _a = a[key].toLowerCase();
+						const _b = b[key].toLowerCase();
+
+						if (sort[key] === "asc") {
+							if (_a > _b) return 1;
+							if (_a === _b) return 0;
+							if (_a < _b) return -1;
+						}
+						else {
+							if (_b > _a) return 1;
+							if (_b === _a) return 0;
+							if (_b < _a) return -1;
+						}
+					});
 				}
 			});
 

@@ -1,9 +1,13 @@
 import {JetView} from "webix-jet";
 
+
 export default class Members extends JetView {
 	config() {
 		return {
 			view: "datatable",
+			editable: true,
+			save: "json->http://localhost:5000/api/members",
+			url: "http://localhost:5000/api/members",
 			columns: [
 				{
 					id: "Name",
@@ -21,6 +25,7 @@ export default class Members extends JetView {
 					id: "BirthDate",
 					header: ["Birth Date", {content: "serverFilter"}],
 					sort: "server",
+					editor: "text",
 					fillspace: 1
 				},
 				{
@@ -37,10 +42,5 @@ export default class Members extends JetView {
 				}
 			]
 		};
-	}
-
-	init(view) {
-		const url = "http://localhost:5000/api/members";
-		view.load(url);
 	}
 }
