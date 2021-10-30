@@ -13,13 +13,23 @@ class MemberController {
 
 	async getAll(req, res) {
 		try {
-			const {start = 0, count = 50} = req.query;
+			const {start = 0, count = 50, filter = {}} = req.query;
 			const members = await MemberService.getAll();
 
 			let dataChunk = [];
 			for (let i = 0; i < count; i++) {
 				dataChunk[i] = members[+start + i];
 			}
+
+			const matchValue = (obj, value) => obj.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+			const filterKeys = Object.keys(filter);
+
+			filterKeys.forEach((key) => {
+				if (key) {
+					dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
+				}
+			});
+
 			const webixObj = {
 				data: [...dataChunk],
 				pos: start,
@@ -28,6 +38,7 @@ class MemberController {
 			res.json(webixObj);
 		}
 		catch (error) {
+			console.log(error.message);
 			res.status(500).json(error);
 		}
 	}

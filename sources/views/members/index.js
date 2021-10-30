@@ -7,11 +7,11 @@ export default class Members extends JetView {
 		return {
 			view: "datatable",
 			columns: [
-				{id: "Name", header: "Name", fillspace: 1},
-				{id: "Role", header: "Role", fillspace: 1},
-				{id: "BirthDate", header: "Birth Date", fillspace: 1},
-				{id: "Country", header: "Country", fillspace: 1},
-				{id: "Awards", header: "Awards", fillspace: 1}
+				{id: "Name", header: ["Name", {content: "serverFilter"}], fillspace: 1},
+				{id: "Role", header: ["Role", {content: "serverFilter"}], fillspace: 1},
+				{id: "BirthDate", header: ["Birth Date", {content: "serverFilter"}], fillspace: 1},
+				{id: "Country", header: ["Country", {content: "serverFilter"}], fillspace: 1},
+				{id: "Awards", header: ["Awards", {content: "serverFilter"}], fillspace: 1}
 			]
 		};
 	}
