@@ -15,25 +15,31 @@ class MemberController {
 		try {
 			const {start = 0, count = 50, filter = {}} = req.query;
 			const members = await MemberService.getAll();
+			const totalCount = members.length;
 
 			let dataChunk = [];
-			for (let i = 0; i < count; i++) {
+			const check = i => i < count && (+start + i) < totalCount;
+			for (
+				let i = 0; check(i); i++) {
 				dataChunk[i] = members[+start + i];
 			}
 
 			const matchValue = (obj, value) => obj.toLowerCase().indexOf(value.toLowerCase()) !== -1;
 			const filterKeys = Object.keys(filter);
+			let chunkLength = 0;
 
 			filterKeys.forEach((key) => {
-				if (key) {
+				if (filter[key]) {
 					dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
+					chunkLength = dataChunk.length;
 				}
 			});
+
 
 			const webixObj = {
 				data: [...dataChunk],
 				pos: start,
-				total_count: members.length
+				total_count: chunkLength || totalCount
 			};
 			res.json(webixObj);
 		}
