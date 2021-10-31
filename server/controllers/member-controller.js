@@ -1,5 +1,35 @@
 import MemberService from "../services/member-service.js";
 
+const serverSort = (sort, data) => {
+	const sortKeys = Object.keys(sort);
+	sortKeys.forEach((key) => {
+		if (sort[key]) {
+			data.sort((a, b) => {
+				const aLow = a[key].toLowerCase();
+				const bLow = b[key].toLowerCase();
+
+				const sortFn = (A, B) => {
+					if (A > B) return 1;
+					if (A === B) return 0;
+					return -1;
+				};
+
+				if (sort[key] === "asc") {
+					return sortFn(aLow, bLow);
+				}
+				return	sortFn(bLow, aLow);
+			});
+		}
+	});
+};
+
+const matchValue = (obj, value) => {
+	const objLow = obj.toLowerCase();
+	const valueLow = value.toLowerCase();
+	return objLow.indexOf(valueLow) !== -1;
+};
+
+
 class MemberController {
 	async create(req, res) {
 		try {
@@ -14,55 +44,34 @@ class MemberController {
 	async getAll(req, res) {
 		try {
 			const {start = 0, count = 50, filter = {}, sort = {}} = req.query;
+
 			const members = await MemberService.getAll();
 			const totalCount = members.length;
 
-
 			let dataChunk = [];
+			let chunkLength = 0;
+
+			const filterValues = Object.values(filter);
+			const checkFilter = filterValues.find(item => item !== "");
+
+			if (!checkFilter) serverSort(sort, members);
+
 			const check = i => i < count && (+start + i) < totalCount;
-			for (
-				let i = 0; check(i); i++) {
+
+			for (let i = 0; check(i); i++) {
 				dataChunk[i] = members[+start + i];
 			}
 
-			const matchValue = (obj, value) => obj.toLowerCase().indexOf(value.toLowerCase()) !== -1;
-			const filterKeys = Object.keys(filter);
-			let chunkLength = 0;
-
-			filterKeys.forEach((key) => {
-				if (filter[key]) {
-					dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
-					chunkLength = dataChunk.length;
-				}
-			});
-
-			const sortKeys = Object.keys(sort);
-			sortKeys.forEach((key) => {
-				if (sort[key]) {
-					/* dataChunk = dataChunk.sort((a, b) => {
-						if (sort[key] === "asc") {
-							console.log(a[key].toLowerCase() - b[key].toLowerCase())
-							return a[key].toLowerCase() - b[key].toLowerCase();
-						}
-						return b[key].toLowerCase() - a[key].toLowerCase();
-					}); */
-					dataChunk.sort((a, b) => {
-						const _a = a[key].toLowerCase();
-						const _b = b[key].toLowerCase();
-
-						if (sort[key] === "asc") {
-							if (_a > _b) return 1;
-							if (_a === _b) return 0;
-							if (_a < _b) return -1;
-						}
-						else {
-							if (_b > _a) return 1;
-							if (_b === _a) return 0;
-							if (_b < _a) return -1;
-						}
-					});
-				}
-			});
+			if (checkFilter) {
+				const filterKeys = Object.keys(filter);
+				filterKeys.forEach((key) => {
+					if (filter[key]) {
+						dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
+						chunkLength = dataChunk.length;
+						serverSort(sort, dataChunk);
+					}
+				});
+			}
 
 
 			const webixObj = {
@@ -110,6 +119,7 @@ class MemberController {
 			res.status(500).json(error);
 		}
 	}
+
 }
 
 export default new MemberController();
