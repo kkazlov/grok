@@ -8,6 +8,9 @@ export default class Members extends JetView {
 			editable: true,
 			save: "json->http://localhost:5000/api/members",
 			url: "http://localhost:5000/api/members",
+			rules: {
+				BirthDate: webix.rules.isNotEmpty
+			},
 			columns: [
 				{
 					id: "Name",
@@ -25,8 +28,15 @@ export default class Members extends JetView {
 					id: "BirthDate",
 					header: ["Birth Date", {content: "serverFilter"}],
 					sort: "server",
-					editor: "text",
-					fillspace: 1
+					editor: "date",
+					fillspace: 1,
+					template: obj => obj.BirthDate.slice(0, 11) || "No date",
+					suggest: {
+						type: "calendar",
+						body: {
+							maxDate: new Date()
+						}
+					}
 				},
 				{
 					id: "Country",
@@ -42,5 +52,10 @@ export default class Members extends JetView {
 				}
 			]
 		};
+	}
+
+	init(view) {
+		this.on(view, "onAfterEditStop", () => {
+		})
 	}
 }
