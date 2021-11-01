@@ -9,20 +9,22 @@ export default class Members extends JetView {
 			save: "json->http://localhost:5000/api/members",
 			url: "http://localhost:5000/api/members",
 			rules: {
-				BirthDate: webix.rules.isNotEmpty
+				$all: value => webix.rules.isNotEmpty(value) && value.toString().length <= 30
 			},
 			columns: [
 				{
 					id: "Name",
 					header: ["Name", {content: "serverFilter"}],
 					sort: "server",
-					fillspace: 1
+					fillspace: 1,
+					editor: "text"
 				},
 				{
 					id: "Role",
 					header: ["Role", {content: "serverFilter"}],
 					sort: "server",
-					fillspace: 1
+					fillspace: 1,
+					editor: "text"
 				},
 				{
 					id: "BirthDate",
@@ -42,20 +44,30 @@ export default class Members extends JetView {
 					id: "Country",
 					header: ["Country", {content: "serverFilter"}],
 					sort: "server",
-					fillspace: 1
+					fillspace: 1,
+					editor: "text"
 				},
 				{
 					id: "Awards",
 					header: ["Awards", {content: "serverFilter"}],
 					sort: "server",
-					fillspace: 1
+					fillspace: 1,
+					editor: "text"
 				}
 			]
 		};
 	}
 
 	init(view) {
-		this.on(view, "onAfterEditStop", () => {
-		})
+		/* this.on(webix, "onBeforeAjax", (mode, url) => {
+			if (mode === "GET") this._req = url;
+		});
+
+		this.on(view, "onAfterEditStop", (state, editor, ignoreUpdate) => {
+			console.log(view.getFilter())
+			setTimeout(() => {
+				view.load(this._req)
+			}, 500);
+		}); */
 	}
 }

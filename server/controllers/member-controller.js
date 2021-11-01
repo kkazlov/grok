@@ -46,10 +46,9 @@ class MemberController {
 			const {start = 0, count = 50, filter = {}, sort = {}} = req.query;
 
 			const members = await MemberService.getAll();
-			const totalCount = members.length;
+			let totalCount = members.length;
 
 			let dataChunk = [];
-			let chunkLength = 0;
 
 			const filterValues = Object.values(filter);
 			const checkFilter = filterValues.find(item => item !== "");
@@ -67,7 +66,7 @@ class MemberController {
 				filterKeys.forEach((key) => {
 					if (filter[key]) {
 						dataChunk = dataChunk.filter(item => matchValue(item[key], filter[key]));
-						chunkLength = dataChunk.length;
+						totalCount = dataChunk.length;
 						serverSort(sort, dataChunk);
 					}
 				});
@@ -77,7 +76,7 @@ class MemberController {
 			const webixObj = {
 				data: [...dataChunk],
 				pos: start,
-				total_count: chunkLength || totalCount
+				total_count: totalCount
 			};
 			res.json(webixObj);
 		}
