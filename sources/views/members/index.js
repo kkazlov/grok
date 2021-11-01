@@ -54,7 +54,18 @@ export default class Members extends JetView {
 					fillspace: 1,
 					editor: "text"
 				}
-			]
+			],
+			on: {
+				onBeforeEditStop(state, editor, ignore) {
+					const value = editor.getValue();
+					const check = (value !== "" && value.length <= 30);
+					if (!ignore && !check) {
+						this.validateEditor(editor);
+						return false;
+					}
+					return true;
+				}
+			}
 		};
 	}
 
@@ -62,8 +73,8 @@ export default class Members extends JetView {
 		let filtersValue = {};
 
 		const matchValue = (obj, value) => {
-			const objLow = obj.toLowerCase();
-			const valueLow = value.toLowerCase();
+			const objLow = obj.toString().toLowerCase();
+			const valueLow = value.toString().toLowerCase();
 			return objLow.indexOf(valueLow) !== -1;
 		};
 
@@ -71,13 +82,13 @@ export default class Members extends JetView {
 			const filterKeys = Object.keys(filtersValue);
 			filterKeys.forEach((key) => {
 				if (filtersValue[key]) {
-					view.data.filter(item => matchValue(item[key], filtersValue[key]));
+					view.data.filter(item => matchValue(item[key], filtersValue[key]), "", true);
 				}
 			});
 		});
 
 		this.on(view, "onBeforeFilter", (id, value) => {
-			filtersValue[id] = value;
+			filtersValue[id] = value.toString().toLowerCase();
 		});
 	}
 }
