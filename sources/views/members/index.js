@@ -59,15 +59,25 @@ export default class Members extends JetView {
 	}
 
 	init(view) {
-		/* this.on(webix, "onBeforeAjax", (mode, url) => {
-			if (mode === "GET") this._req = url;
+		let filtersValue = {};
+
+		const matchValue = (obj, value) => {
+			const objLow = obj.toLowerCase();
+			const valueLow = value.toLowerCase();
+			return objLow.indexOf(valueLow) !== -1;
+		};
+
+		this.on(view.data, "onDataUpdate", () => {
+			const filterKeys = Object.keys(filtersValue);
+			filterKeys.forEach((key) => {
+				if (filtersValue[key]) {
+					view.data.filter(item => matchValue(item[key], filtersValue[key]));
+				}
+			});
 		});
 
-		this.on(view, "onAfterEditStop", (state, editor, ignoreUpdate) => {
-			console.log(view.getFilter())
-			setTimeout(() => {
-				view.load(this._req)
-			}, 500);
-		}); */
+		this.on(view, "onBeforeFilter", (id, value) => {
+			filtersValue[id] = value;
+		});
 	}
 }
