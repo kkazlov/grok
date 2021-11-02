@@ -54,18 +54,7 @@ export default class Members extends JetView {
 					fillspace: 1,
 					editor: "text"
 				}
-			],
-			on: {
-				onBeforeEditStop(state, editor, ignore) {
-					const value = editor.getValue();
-					const check = (value !== "" && value.length <= 30);
-					if (!ignore && !check) {
-						this.validateEditor(editor);
-						return false;
-					}
-					return true;
-				}
-			}
+			]
 		};
 	}
 
@@ -89,6 +78,20 @@ export default class Members extends JetView {
 
 		this.on(view, "onBeforeFilter", (id, value) => {
 			filtersValue[id] = value.toString().toLowerCase();
+		});
+
+		this.on(view, "onBeforeEditStop", (state, editor, ignore) => {
+			const value = editor.getValue();
+			const check = (value !== "" && value.length <= 30);
+			if (!ignore && !check) {
+				view.validateEditor(editor);
+				return false;
+			}
+			return true;
+		});
+
+		this.on(view, "onDataRequest", () => {
+			view.editCancel();
 		});
 	}
 }
