@@ -75,6 +75,11 @@ export default class Groups extends JetView {
 					sort: "string"
 				}
 			],
+			scheme: {
+				$change(obj) {
+					obj.Date = webix.Date.strToDate("%Y-%m-%d")(obj.CreationDate);
+				}
+			},
 			css: "webix_data_border webix_header_border"
 		};
 
@@ -100,6 +105,10 @@ export default class Groups extends JetView {
 		this.on(groupsDB, "onDataUpdate", () => {
 			table.filterByAll();
 		});
+
+		this.on(table, "onAfterLoad", () => {
+			table.filterByAll();
+		});
 	}
 
 	trackCounter(group) {
@@ -119,8 +128,7 @@ export default class Groups extends JetView {
 		table.clearAll();
 
 		albumsDB.waitData.then(() => {
-			table.parse(groupsDB);
-			table.filterByAll();
+			table.load("http://localhost:5000/api/groups");
 		});
 	}
 }
