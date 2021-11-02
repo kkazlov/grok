@@ -23,9 +23,7 @@ export default class Groups extends JetView {
 					view: "button",
 					value: "Refresh",
 					width: 200,
-					click: () => {
-						this.$$("table").refresh();
-					}
+					click: () => this.refresh()
 				}
 			]
 		};
@@ -67,7 +65,7 @@ export default class Groups extends JetView {
 					id: "Date",
 					header: ["Creation date", {content: "datepickerFilter"}],
 					fillspace: 3,
-					format: value => webix.i18n.longDateFormatStr(value),
+					format: value => webix.Date.dateToStr("%Y-%m-%d")(value),
 					sort: "date"
 				},
 				{
@@ -104,9 +102,21 @@ export default class Groups extends JetView {
 		const collection = this.$$("table").config.columns[2].collection;
 		const albumsArr = collection.find(album => album.GroupID === group.id);
 		let trackCounter = 0;
+
 		albumsArr.forEach((item) => {
 			trackCounter += item.TrackList.length;
 		});
+
 		return trackCounter;
+	}
+
+	refresh() {
+		const table = this.$$("table");
+		table.clearAll();
+
+		albumsDB.waitData.then(() => {
+			table.parse(groupsDB);
+			table.filterByAll();
+		});
 	}
 }

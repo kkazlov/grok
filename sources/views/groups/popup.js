@@ -28,7 +28,7 @@ export default class Popup extends JetView {
 		const date = {
 			view: "datepicker",
 			localId: "date",
-			format: "%d %M %Y",
+			format: "%Y-%m-%d",
 			label: "Creation date",
 			name: "Date",
 			required: true
