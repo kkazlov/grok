@@ -96,6 +96,10 @@ export default class Groups extends JetView {
 		this.on(table, "onAfterSelect", ({id}) => {
 			this._popup.showWindow(id, table, layout);
 		});
+
+		this.on(groupsDB, "onDataUpdate", () => {
+			table.filterByAll();
+		});
 	}
 
 	trackCounter(group) {
