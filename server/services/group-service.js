@@ -12,13 +12,13 @@ class GroupService {
 	}
 
 	async getOne(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const group = await Group.findById(id);
 		return group;
 	}
 
 	async update(group) {
-		if (!group._id) throw new Error("ID не указан");
+		if (!group._id) throw new Error("No ID");
 		const updatedGroup = await Group.findByIdAndUpdate(group._id, group, {
 			new: true
 		});
@@ -26,7 +26,7 @@ class GroupService {
 	}
 
 	async delete(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const group = await Group.findByIdAndDelete(id);
 		return group;
 	}

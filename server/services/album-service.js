@@ -19,13 +19,13 @@ class AlbumService {
 	}
 
 	async getOne(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const album = await Album.findById(id);
 		return album;
 	}
 
 	async update(album) {
-		if (!album._id) throw new Error("ID не указан");
+		if (!album._id) throw new Error("No ID");
 		const updatedAlbum = await Album.findByIdAndUpdate(album._id, album, {
 			new: true
 		});
@@ -33,7 +33,7 @@ class AlbumService {
 	}
 
 	async delete(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const selectedAlbum = await Album.findById(id);
 		filesService.deleteFile(selectedAlbum.Photo);
 

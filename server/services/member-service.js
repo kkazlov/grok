@@ -12,13 +12,13 @@ class MemberService {
 	}
 
 	async getOne(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const member = await Member.findById(id);
 		return member;
 	}
 
 	async update(member) {
-		if (!member._id) throw new Error("ID не указан");
+		if (!member._id) throw new Error("No ID");
 		const updatedMember = await Member.findByIdAndUpdate(
 			member._id,
 			member,
@@ -28,7 +28,7 @@ class MemberService {
 	}
 
 	async delete(id) {
-		if (!id) throw new Error("ID не указан");
+		if (!id) throw new Error("No ID");
 		const member = await Member.findByIdAndDelete(id);
 		return member;
 	}
