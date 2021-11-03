@@ -1,8 +1,10 @@
 import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
-import groupService from "../services/group-service.js";
+import Group from "../models/group.js";
+import ServicesConstr from "../services/services-constr.js";
 
+const groupService = new ServicesConstr(Group);
 const groupController = new ControllerConstr(groupService);
 const groupRouter = new Router();
 

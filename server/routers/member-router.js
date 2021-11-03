@@ -1,8 +1,10 @@
 import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
-import memberService from "../services/member-service.js";
+import Member from "../models/member.js"
+import ServicesConstr from "../services/services-constr.js";
 
+const memberService = new ServicesConstr(Member);
 const memberController = new ControllerConstr(memberService);
 const memberRouter = new Router();
 

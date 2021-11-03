@@ -15,7 +15,7 @@ class ControllerConstr {
 
 	async createWithFile(req, res) {
 		try {
-			const data = await this.service.create(req.body, req.files);
+			const data = await this.service.createWithFile(req.body, req.files);
 			res.json(data);
 		}
 		catch (error) {
@@ -59,6 +59,17 @@ class ControllerConstr {
 		try {
 			const {id} = req.params;
 			const data = await this.service.delete(id);
+			res.json(data);
+		}
+		catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
+
+	async deleteWithFile(req, res) {
+		try {
+			const {id} = req.params;
+			const data = await this.service.deleteWithFile(id);
 			res.json(data);
 		}
 		catch (error) {
