@@ -111,8 +111,8 @@ class ControllerConstr {
 	}
 
 	matchValue(obj, value) {
-		const objLow = obj.toLowerCase();
-		const valueLow = value.toLowerCase();
+		const objLow = obj.toString().toLowerCase();
+		const valueLow = value.toString().toLowerCase();
 		return objLow.indexOf(valueLow) !== -1;
 	}
 
