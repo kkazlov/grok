@@ -79,7 +79,6 @@ export default class Groups extends JetView {
 	init() {
 		this._popup = this.ui(Popup);
 		const table = this.$$("table");
-		const layout = this.$$("layout");
 
 		table.showOverlay("Loading...");
 
@@ -89,7 +88,6 @@ export default class Groups extends JetView {
 		});
 
 		this.on(table, "onAfterSelect", ({id}) => {
-			layout.disable();
 			this._popup.showWindow(id);
 		});
 
@@ -103,7 +101,6 @@ export default class Groups extends JetView {
 
 		this.on(this.app, "groups:popup:hide", () => {
 			table.clearSelection();
-			layout.enable();
 		});
 	}
 
