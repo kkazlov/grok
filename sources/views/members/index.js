@@ -32,7 +32,6 @@ export default class Members extends JetView {
 					sort: "server",
 					editor: "date",
 					fillspace: 1,
-					template: obj => obj.BirthDate.slice(0, 11) || "No date",
 					suggest: {
 						type: "calendar",
 						body: {
@@ -82,6 +81,11 @@ export default class Members extends JetView {
 
 		this.on(view, "onBeforeEditStop", (state, editor, ignore) => {
 			const value = editor.getValue();
+
+			if (editor.column === "BirthDate") {
+				state.value = webix.Date.dateToStr("%Y-%m-%d")(value);
+			}
+
 			const check = (value !== "" && value.length <= 30);
 			if (!ignore && !check) {
 				view.validateEditor(editor);
