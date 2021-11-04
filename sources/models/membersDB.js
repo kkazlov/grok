@@ -1,6 +1,8 @@
+import {membersURL} from "../config/urls";
+
 const membersDB = new webix.DataCollection({
-	url: "http://localhost:5000/api/members",
-	save: "json->http://localhost:5000/api/members"
+	url: membersURL,
+	save: `json->${membersURL}`
 });
 
 export default membersDB;

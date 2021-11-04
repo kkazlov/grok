@@ -1,5 +1,6 @@
 import {JetView} from "webix-jet";
 
+import {groupsURL} from "../../config/urls";
 import groupsDB from "../../models/groupsDB";
 import Popup from "./popup";
 
@@ -111,7 +112,7 @@ export default class Groups extends JetView {
 		table.clearAll();
 
 		table.showOverlay("Loading...");
-		table.load("http://localhost:5000/api/groups").then(() => {
+		table.load(groupsURL).then(() => {
 			table.hideOverlay();
 		});
 	}

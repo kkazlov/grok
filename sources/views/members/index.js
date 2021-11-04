@@ -1,13 +1,14 @@
 import {JetView} from "webix-jet";
 
+import {membersURL} from "../../config/urls";
 
 export default class Members extends JetView {
 	config() {
 		return {
 			view: "datatable",
 			editable: true,
-			save: "json->http://localhost:5000/api/members",
-			url: "http://localhost:5000/api/members",
+			save: `json->${membersURL}`,
+			url: membersURL,
 			rules: {
 				$all: value => webix.rules.isNotEmpty(value) && value.toString().length <= 30
 			},
