@@ -47,7 +47,7 @@ export default class Groups extends JetView {
 				},
 				{
 					id: "Tracks",
-					header: ["Number of tracks", {content: "textFilter"}],
+					header: ["Number of tracks", {content: "numberFilter"}],
 					fillspace: 3,
 					sort: "int"
 				},
