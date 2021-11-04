@@ -30,7 +30,7 @@ export default class Popup extends JetView {
 			localId: "date",
 			format: "%Y-%m-%d",
 			label: "Creation date",
-			name: "Date",
+			name: "CreationDate",
 			required: true
 		};
 
@@ -58,6 +58,7 @@ export default class Popup extends JetView {
 			view: "window",
 			localId: "window",
 			position: "center",
+			modal: true,
 			head: "Edit",
 			width: 600,
 			body: {
@@ -93,9 +94,7 @@ export default class Popup extends JetView {
 		const form = this.$$("form");
 		const values = form.getValues();
 
-		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(values.Date);
-		delete values.Date;
-
+		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(values.CreationDate);
 		const sendObj = {...values, CreationDate: dateStr};
 
 		const validation = form.validate();
@@ -109,14 +108,12 @@ export default class Popup extends JetView {
 		}
 	}
 
-	showWindow(id, table, layout) {
+	showWindow(id) {
 		this._id = id;
-		this._table = table;
-		this._layout = layout;
-
 		const form = this.$$("form");
 
-		this._layout.disable();
+		form.clear();
+		form.clearValidation();
 
 		groupsDB.waitData.then(() => {
 			const values = groupsDB.getItem(id);
@@ -127,14 +124,9 @@ export default class Popup extends JetView {
 	}
 
 	hideWindow() {
-		const form = this.$$("form");
-
-		form.clear();
-		form.clearValidation();
-
-		this.getRoot().hide();
-		this._table.clearSelection();
-		this._layout.enable();
+		this.$$("window").hide();
+		/* this.getRoot().hide(); */
+		this.app.callEvent("groups:popup:hide");
 	}
 }
 

@@ -88,7 +88,8 @@ export default class Groups extends JetView {
 		});
 
 		this.on(table, "onAfterSelect", ({id}) => {
-			this._popup.showWindow(id, table, layout);
+			layout.disable();
+			this._popup.showWindow(id);
 		});
 
 		this.on(groupsDB, "onDataUpdate", () => {
@@ -97,6 +98,11 @@ export default class Groups extends JetView {
 
 		this.on(table, "onAfterLoad", () => {
 			table.filterByAll();
+		});
+
+		this.on(this.app, "groups:popup:hide", () => {
+			table.clearSelection();
+			layout.enable();
 		});
 	}
 
