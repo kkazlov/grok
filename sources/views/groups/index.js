@@ -47,19 +47,9 @@ export default class Groups extends JetView {
 				},
 				{
 					id: "Tracks",
-					header: [
-						"Number of tracks",
-						{
-							content: "textFilter",
-							compare: (value, filter, obj) => this.trackCounter(obj)
-								.toString()
-								.indexOf(filter) === 0
-						}
-					],
+					header: ["Number of tracks", {content: "textFilter"}],
 					fillspace: 3,
-					collection: albumsDB,
-					template: obj => this.trackCounter(obj),
-					sort: (a, b) => this.trackCounter(a) - this.trackCounter(b)
+					sort: "int"
 				},
 				{
 					id: "Date",
@@ -109,18 +99,6 @@ export default class Groups extends JetView {
 		this.on(table, "onAfterLoad", () => {
 			table.filterByAll();
 		});
-	}
-
-	trackCounter(group) {
-		const collection = this.$$("table").config.columns[2].collection;
-		const albumsArr = collection.find(album => album.GroupID === group.id);
-		let trackCounter = 0;
-
-		albumsArr.forEach((item) => {
-			trackCounter += item.TrackList.length;
-		});
-
-		return trackCounter;
 	}
 
 	refresh() {
