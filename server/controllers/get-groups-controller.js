@@ -18,7 +18,7 @@ const getGroupsController = {
 				groupAlbums.forEach((item) => {
 					trackCounter += item.TrackList.length;
 				});
-				sendData.push({...group._doc, Tracks: trackCounter});
+				sendData.push({...group._doc, Tracks: trackCounter, id: group._id});
 			});
 			res.json(sendData);
 		}
