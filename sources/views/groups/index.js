@@ -1,6 +1,5 @@
 import {JetView} from "webix-jet";
 
-import albumsDB from "../../models/albumsDB";
 import groupsDB from "../../models/groupsDB";
 import Popup from "./popup";
 
@@ -83,7 +82,7 @@ export default class Groups extends JetView {
 
 		table.showOverlay("Loading...");
 
-		albumsDB.waitData.then(() => {
+		groupsDB.waitData.then(() => {
 			table.parse(groupsDB);
 			table.hideOverlay();
 		});
@@ -105,8 +104,9 @@ export default class Groups extends JetView {
 		const table = this.$$("table");
 		table.clearAll();
 
-		albumsDB.waitData.then(() => {
-			table.load("http://localhost:5000/api/groups");
+		table.showOverlay("Loading...");
+		table.load("http://localhost:5000/api/groups").then(() => {
+			table.hideOverlay();
 		});
 	}
 }
