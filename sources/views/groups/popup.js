@@ -125,7 +125,6 @@ export default class Popup extends JetView {
 
 	hideWindow() {
 		this.$$("window").hide();
-		/* this.getRoot().hide(); */
 		this.app.callEvent("groups:popup:hide");
 	}
 }
