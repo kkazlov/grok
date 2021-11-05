@@ -1,5 +1,11 @@
-const groupsURL = "http://localhost:5000/api/groups";
-const membersURL = "http://localhost:5000/api/members";
-const albumsURL = "http://localhost:5000/api/albums";
+const host = process.env.DB_HOST;
 
-export {groupsURL, membersURL, albumsURL};
+const groupsAPI = process.env.GROUPS_API;
+const membersAPI = process.env.MEMBERS_API;
+const albumsAPI = process.env.ALBUMS_API;
+
+const groupsURL = host + groupsAPI;
+const membersURL = host + membersAPI;
+const albumsURL = host + albumsAPI;
+
+export {groupsURL, membersURL, albumsURL, host};

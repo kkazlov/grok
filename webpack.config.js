@@ -1,4 +1,5 @@
 let path = require("path");
+const Dotenv = require('dotenv-webpack');
 let webpack = require("webpack");
 
 module.exports = function (env) {
@@ -58,7 +59,8 @@ module.exports = function (env) {
 				APPNAME: `"${pack.name}"`,
 				PRODUCTION: production,
 				BUILD_AS_MODULE: asmodule || standalone
-			})
+			}),
+			new Dotenv()
 		],
 		devServer: {
 			stats: "errors-only"
