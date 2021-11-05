@@ -15,7 +15,7 @@ class ControllerConstr {
 
 	async createWithFile(req, res) {
 		try {
-			const data = await this.service.createWithFile(req.body, req.files);
+			const data = await this.service.createWithFile(req.body, req.files, "Photo");
 			res.json(data);
 		}
 		catch (error) {
@@ -91,9 +91,9 @@ class ControllerConstr {
 
 			if (!checkFilter) this.serverSort(sort, members);
 
-			const check = i => i < count && (+start + i) < totalCount;
+			const checkChunkIndex = i => i < count && (+start + i) < totalCount;
 
-			for (let i = 0; check(i); i++) {
+			for (let i = 0; checkChunkIndex(i); i++) {
 				dataChunk[i] = members[+start + i];
 			}
 
@@ -101,7 +101,7 @@ class ControllerConstr {
 				const filterKeys = Object.keys(filter);
 				filterKeys.forEach((key) => {
 					if (filter[key]) {
-						dataChunk = dataChunk.filter(item => this.matchValue(item[key], filter[key]));
+						dataChunk = dataChunk.filter(item => this.findValue(item[key], filter[key]));
 						totalCount = dataChunk.length;
 						this.serverSort(sort, dataChunk);
 					}
@@ -121,7 +121,7 @@ class ControllerConstr {
 		}
 	}
 
-	matchValue(obj, value) {
+	findValue(obj, value) {
 		const objLow = obj.toString().toLowerCase();
 		const valueLow = value.toString().toLowerCase();
 		return objLow.indexOf(valueLow) !== -1;

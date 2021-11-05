@@ -61,7 +61,7 @@ export default class Members extends JetView {
 	init(view) {
 		let filtersValue = {};
 
-		const matchValue = (obj, value) => {
+		const findValue = (obj, value) => {
 			const objLow = obj.toString().toLowerCase();
 			const valueLow = value.toString().toLowerCase();
 			return objLow.indexOf(valueLow) !== -1;
@@ -71,7 +71,7 @@ export default class Members extends JetView {
 			const filterKeys = Object.keys(filtersValue);
 			filterKeys.forEach((key) => {
 				if (filtersValue[key]) {
-					view.data.filter(item => matchValue(item[key], filtersValue[key]), "", true);
+					view.data.filter(item => findValue(item[key], filtersValue[key]), "", true);
 				}
 			});
 		});
