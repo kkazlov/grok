@@ -33,6 +33,16 @@ class ControllerConstr {
 		}
 	}
 
+	async dynamicLoading(req, res) {
+		try {
+			const data = await this.service.dynamicLoading(req);
+			res.json(data);
+		}
+		catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
+
 	async getOne(req, res) {
 		try {
 			const {id} = req.params;
@@ -75,79 +85,6 @@ class ControllerConstr {
 		catch (error) {
 			res.status(500).json(error.message);
 		}
-	}
-
-	async dynamicLoading(req, res) {
-		try {
-			const {start = 0, count = 50, filter = {}, sort = {}} = req.query;
-
-			const members = await this.service.getAll();
-			let totalCount = members.length;
-
-			let dataChunk = [];
-
-			const filterValues = Object.values(filter);
-			const checkFilter = filterValues.find(item => item !== "");
-
-			if (!checkFilter) this.serverSort(sort, members);
-
-			const checkChunkIndex = i => i < count && (+start + i) < totalCount;
-
-			for (let i = 0; checkChunkIndex(i); i++) {
-				dataChunk[i] = members[+start + i];
-			}
-
-			if (checkFilter) {
-				const filterKeys = Object.keys(filter);
-				filterKeys.forEach((key) => {
-					if (filter[key]) {
-						dataChunk = dataChunk.filter(item => this.findValue(item[key], filter[key]));
-						totalCount = dataChunk.length;
-						this.serverSort(sort, dataChunk);
-					}
-				});
-			}
-
-
-			const webixObj = {
-				data: [...dataChunk],
-				pos: start,
-				total_count: totalCount
-			};
-			res.json(webixObj);
-		}
-		catch (error) {
-			res.status(500).json(error.message);
-		}
-	}
-
-	findValue(obj, value) {
-		const objLow = obj.toString().toLowerCase();
-		const valueLow = value.toString().toLowerCase();
-		return objLow.indexOf(valueLow) !== -1;
-	}
-
-	serverSort(sort, data) {
-		const sortKeys = Object.keys(sort);
-		sortKeys.forEach((key) => {
-			if (sort[key]) {
-				data.sort((a, b) => {
-					const aLow = a[key].toLowerCase();
-					const bLow = b[key].toLowerCase();
-
-					const sortFn = (A, B) => {
-						if (A > B) return 1;
-						if (A === B) return 0;
-						return -1;
-					};
-
-					if (sort[key] === "asc") {
-						return sortFn(aLow, bLow);
-					}
-					return	sortFn(bLow, aLow);
-				});
-			}
-		});
 	}
 }
 
