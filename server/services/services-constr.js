@@ -10,11 +10,11 @@ class ServicesConstr {
 		return createdGroup;
 	}
 
-	async createWithFile(data, files, file) {
+	async createWithFile(data, files, fileName) {
 		let createdData;
 		if (files) {
-			const fileName = filesService.saveFile(files[file]);
-			createdData = await this.model.create({...data, [file]: fileName});
+			const serverFileName = filesService.saveFile(files[fileName]);
+			createdData = await this.model.create({...data, [fileName]: serverFileName});
 			return createdData;
 		}
 		createdData = await this.model.create(data);
