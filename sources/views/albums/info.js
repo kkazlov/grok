@@ -45,7 +45,7 @@ export default class Info extends JetView {
 		} = obj;
 
 		const emptyPhoto = "https://via.placeholder.com/550";
-		const photoURl = Photo ? (host + Photo) : emptyPhoto;
+		const photoURl = Photo ? `${host}${Photo}` : emptyPhoto;
 
 		const tracks = TrackList
 			.map(item => `<li>${item}</li>`)

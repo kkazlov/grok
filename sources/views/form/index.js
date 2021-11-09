@@ -17,7 +17,8 @@ export default class Form extends JetView {
 			view: "combo",
 			label: "Style",
 			options: stylesDB,
-			required: true
+			required: true,
+			name: "Style"
 		};
 
 		const CreationDateElem = {
@@ -29,7 +30,7 @@ export default class Form extends JetView {
 			required: true
 		};
 
-		const CountryElem = {view: "text", label: "Country"};
+		const CountryElem = {view: "text", label: "Country", name: "Country"};
 
 		const CheckboxElem = {view: "checkbox", label: "In tour"};
 		const NearConcertElem = {view: "text", label: "Near concert"};
@@ -77,6 +78,7 @@ export default class Form extends JetView {
 		};
 
 		return {
+			localId: "form",
 			view: "form",
 			margin: 30,
 			elementsConfig: {labelWidth: 150},
@@ -86,7 +88,7 @@ export default class Form extends JetView {
 					margin: 30,
 					localId: "editableLayout",
 					rows: [
-						{cols: [{rows: formElems}, AlbumTable]},
+						{margin: 15, cols: [{rows: formElems}, AlbumTable]},
 						{rows: [CancelBtn, SaveBtn]}
 					]
 				},
@@ -99,16 +101,24 @@ export default class Form extends JetView {
 		const layout = this.$$("editableLayout");
 		const groupName = this.$$("groupName");
 
+		this.setParam("groupId", false, true);
 		layout.disable();
+
 		this.on(groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
 		});
 	}
 
 	urlChange() {
+		const form = this.$$("form");
 		const layout = this.$$("editableLayout");
 		const groupId = this.getParam("groupId");
 
-		if (groupId) layout.enable();
+		if (groupId) {
+			layout.enable();
+
+			const groupValue = groupsDB.getItem(groupId);
+			form.setValues(groupValue);
+		}
 	}
 }

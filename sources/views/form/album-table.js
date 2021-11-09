@@ -1,5 +1,7 @@
 import {JetView} from "webix-jet";
 
+import albumsDB from "../../models/albumsDB";
+
 export default class AlbumTable extends JetView {
 	config() {
 		return {
@@ -26,11 +28,6 @@ export default class AlbumTable extends JetView {
 					}
 				},
 				{
-					id: "Songs",
-					header: "Tracks",
-					fillspace: 2
-				},
-				{
 					id: "CopiesNumber",
 					header: "Issued copies",
 					fillspace: 3,
@@ -46,5 +43,15 @@ export default class AlbumTable extends JetView {
 			],
 			css: "webix_data_border webix_header_border custom-table"
 		};
+	}
+
+	urlChange(view) {
+		const groupId = this.getParam("groupId");
+
+		if (groupId) {
+			view.data.sync(albumsDB, () => {
+				view.filter(obj => obj.GroupID === groupId);
+			});
+		}
 	}
 }
