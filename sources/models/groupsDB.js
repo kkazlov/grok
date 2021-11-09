@@ -6,6 +6,7 @@ const groupsDB = new webix.DataCollection({
 	scheme: {
 		$change(obj) {
 			obj.Date = webix.Date.strToDate("%Y-%m-%d")(obj.CreationDate);
+			obj.value = obj.Name;
 		}
 	}
 });

@@ -1,66 +1,114 @@
 import {JetView} from "webix-jet";
 
+import groupsDB from "../../models/groupsDB";
+import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
 
 export default class Form extends JetView {
 	config() {
+		const GroupElem = {
+			localId: "groupName",
+			view: "richselect",
+			label: "Group name",
+			options: groupsDB
+		};
+
+		const StyleElem = {
+			view: "combo",
+			label: "Style",
+			options: stylesDB,
+			required: true
+		};
+
+		const CreationDateElem = {
+			view: "datepicker",
+			localId: "date",
+			format: "%Y-%m-%d",
+			label: "Creation date",
+			name: "CreationDate",
+			required: true
+		};
+
+		const CountryElem = {view: "text", label: "Country"};
+
+		const CheckboxElem = {view: "checkbox", label: "In tour"};
+		const NearConcertElem = {view: "text", label: "Near concert"};
+		const NextConcertElem = {view: "text", label: "Next concert"};
+
+		const UploaderElem = {
+			view: "uploader",
+			upload: "//docs.webix.com/samples/server/upload",
+			id: "files",
+			name: "files",
+			value: "Upload a file",
+			link: "doclist",
+			multiple: false,
+			autosend: false // обратите внимание!
+		};
+
+		const UploaderListElem = {
+			view: "list",
+			scroll: false,
+			height: 100,
+			id: "doclist",
+			type: "uploader"
+		};
+
+		const formElems = [
+			StyleElem,
+			CreationDateElem,
+			CountryElem,
+			CheckboxElem,
+			NearConcertElem,
+			NextConcertElem,
+			UploaderElem,
+			UploaderListElem
+		];
+
+		const CancelBtn = {
+			view: "button",
+			value: "Cancel"
+		};
+
+		const SaveBtn = {
+			view: "button",
+			value: "Save",
+			css: "webix_primary"
+		};
+
 		return {
 			view: "form",
+			margin: 30,
 			elementsConfig: {labelWidth: 150},
-			cols: [
+			elements: [
+				GroupElem,
 				{
+					margin: 30,
+					localId: "editableLayout",
 					rows: [
-						{
-							view: "combo",
-							label: "Group name",
-							options: ["One", "Two", "Three"]
-						},
-						{
-							view: "combo",
-							label: "Style",
-							options: ["One", "Two", "Three"],
-							required: true
-						},
-						{
-							view: "datepicker",
-							localId: "date",
-							format: "%Y-%m-%d",
-							label: "Creation date",
-							name: "CreationDate",
-							required: true
-						},
-						{view: "text", label: "Country"},
-						{view: "checkbox", label: "In tour"},
-						{view: "text", label: "Near concert"},
-						{view: "text", label: "Next concert"},
-						{
-							view: "uploader",
-							upload: "//docs.webix.com/samples/server/upload",
-							id: "files",
-							name: "files",
-							value: "Upload a file",
-							link: "doclist",
-							multiple: false,
-							autosend: false // обратите внимание!
-						},
-						{
-							view: "list",
-							scroll: false,
-							id: "doclist",
-							type: "uploader"
-						},
-						{
-							view: "button",
-							value: "Cancel"
-						},
-						{
-							view: "button",
-							value: "Save"
-						}
+						{cols: [{rows: formElems}, AlbumTable]},
+						{rows: [CancelBtn, SaveBtn]}
 					]
 				},
-				AlbumTable
+				{}
 			]
 		};
+	}
+
+	init() {
+		const layout = this.$$("editableLayout");
+		const groupName = this.$$("groupName");
+
+		layout.disable();
+		this.on(groupName, "onChange", (value) => {
+			this.setParam("groupId", value, true);
+		});
+	}
+
+	urlChange() {
+		const layout = this.$$("editableLayout");
+		const groupId = this.getParam("groupId");
+
+		if (groupId) layout.enable();
 	}
 }
