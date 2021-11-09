@@ -22,24 +22,44 @@ export default class Form extends JetView {
 		};
 
 		const CreationDateElem = {
-			view: "datepicker",
 			localId: "date",
+			view: "datepicker",
 			format: "%Y-%m-%d",
 			label: "Creation date",
 			name: "CreationDate",
 			required: true
 		};
 
-		const CountryElem = {view: "text", label: "Country", name: "Country"};
+		const CountryElem = {
+			view: "text",
+			label: "Country",
+			name: "Country"
+		};
 
-		const CheckboxElem = {view: "checkbox", label: "In tour"};
-		const NearConcertElem = {view: "text", label: "Near concert"};
-		const NextConcertElem = {view: "text", label: "Next concert"};
+		const CheckboxElem = {
+			localId: "checkbox",
+			view: "checkbox",
+			label: "In tour",
+			name: "InTour"
+		};
+
+		const NearConcertElem = {
+			localId: "nearConcert",
+			view: "text",
+			label: "Near concert",
+			name: "NearConcert"};
+
+		const NextConcertElem = {
+			localId: "nextConcert",
+			view: "text",
+			label: "Next concert",
+			name: "NextConcert"
+		};
 
 		const UploaderElem = {
 			view: "uploader",
 			upload: "//docs.webix.com/samples/server/upload",
-			id: "files",
+			localId: "files",
 			name: "files",
 			value: "Upload a file",
 			link: "doclist",
@@ -100,18 +120,34 @@ export default class Form extends JetView {
 	init() {
 		const layout = this.$$("editableLayout");
 		const groupName = this.$$("groupName");
+		const checkbox = this.$$("checkbox");
+		const nearConcert = this.$$("nearConcert");
+		const nextConcert = this.$$("nextConcert");
 
 		this.setParam("groupId", false, true);
+
 		layout.disable();
 
 		this.on(groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
+		});
+
+		this.on(checkbox, "onChange", (value) => {
+			if (!value) {
+				nearConcert.disable();
+				nextConcert.disable();
+			}
+			else {
+				nearConcert.enable();
+				nextConcert.enable();
+			}
 		});
 	}
 
 	urlChange() {
 		const form = this.$$("form");
 		const layout = this.$$("editableLayout");
+
 		const groupId = this.getParam("groupId");
 
 		if (groupId) {
