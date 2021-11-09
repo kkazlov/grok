@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import albumRouter from "./routers/album-router.js";
 import groupRouter from "./routers/group-router.js";
 import memberRouter from "./routers/member-router.js";
+import styleRouter from "./routers/style-router.js";
 
 
 const PORT = 5000;
@@ -20,6 +21,7 @@ app.use(cors());
 app.use("/api", groupRouter);
 app.use("/api", memberRouter);
 app.use("/api", albumRouter);
+app.use("/api", styleRouter);
 
 async function startApp() {
 	try {

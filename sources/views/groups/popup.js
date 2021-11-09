@@ -1,6 +1,7 @@
 import {JetView} from "webix-jet";
 
 import groupsDB from "../../models/groupsDB";
+import stylesDB from "../../models/stylesDB";
 
 export default class Popup extends JetView {
 	config() {
@@ -12,9 +13,10 @@ export default class Popup extends JetView {
 		};
 
 		const style = {
-			view: "text",
+			view: "combo",
 			label: "Music Style",
 			name: "Style",
+			options: stylesDB,
 			required: true
 		};
 

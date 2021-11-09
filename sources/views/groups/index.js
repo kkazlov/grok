@@ -2,6 +2,7 @@ import {JetView} from "webix-jet";
 
 import {groupsURL} from "../../config/urls";
 import groupsDB from "../../models/groupsDB";
+import stylesDB from "../../models/stylesDB";
 import Popup from "./popup";
 
 export default class Groups extends JetView {
@@ -41,9 +42,11 @@ export default class Groups extends JetView {
 				},
 				{
 					id: "Style",
-					header: ["Music style", {content: "textFilter"}],
+					header: ["Music style", {content: "selectFilter"}],
 					fillspace: 3,
-					sort: "string"
+					sort: "string",
+					collection: stylesDB,
+					template: obj => stylesDB.getItem(obj.Style).value
 				},
 				{
 					id: "Tracks",
