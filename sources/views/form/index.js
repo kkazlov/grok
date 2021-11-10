@@ -1,5 +1,7 @@
 import {JetView} from "webix-jet";
 
+import {albumsURL} from "../../config/urls";
+import albumsDB from "../../models/albumsDB";
 import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
@@ -47,7 +49,8 @@ export default class Form extends JetView {
 			localId: "nearConcert",
 			view: "text",
 			label: "Near concert",
-			name: "NearConcert"};
+			name: "NearConcert"
+		};
 
 		const NextConcertElem = {
 			localId: "nextConcert",
@@ -80,8 +83,10 @@ export default class Form extends JetView {
 			CreationDateElem,
 			CountryElem,
 			CheckboxElem,
-			NearConcertElem,
-			NextConcertElem,
+			{
+				localId: "concertLayout",
+				rows: [NearConcertElem, NextConcertElem]
+			},
 			UploaderElem,
 			UploaderListElem
 		];
@@ -94,7 +99,20 @@ export default class Form extends JetView {
 		const SaveBtn = {
 			view: "button",
 			value: "Save",
-			css: "webix_primary"
+			css: "webix_primary",
+			click: () => {
+				const checkChanges = this.updatedAlbums.size;
+				if (checkChanges) {
+					this.dp.on();
+
+					this.updatedAlbums.forEach((albumID) => {
+						const album = this.tableData.getItem(albumID);
+						albumsDB.updateItem(albumID, album);
+					});
+
+					this.dp.off();
+				}
+			}
 		};
 
 		return {
@@ -106,7 +124,7 @@ export default class Form extends JetView {
 				GroupElem,
 				{
 					margin: 30,
-					localId: "editableLayout",
+					localId: "mainLayout",
 					rows: [
 						{margin: 15, cols: [{rows: formElems}, AlbumTable]},
 						{rows: [CancelBtn, SaveBtn]}
@@ -118,43 +136,72 @@ export default class Form extends JetView {
 	}
 
 	init() {
-		const layout = this.$$("editableLayout");
+		this.dp = webix.dp(albumsDB);
+		const mainLayout = this.$$("mainLayout");
+		const concertLayout = this.$$("concertLayout");
 		const groupName = this.$$("groupName");
 		const checkbox = this.$$("checkbox");
-		const nearConcert = this.$$("nearConcert");
-		const nextConcert = this.$$("nextConcert");
 
+		this.dp.off();
 		this.setParam("groupId", false, true);
 
-		layout.disable();
+		mainLayout.disable();
 
 		this.on(groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
 		});
 
 		this.on(checkbox, "onChange", (value) => {
-			if (!value) {
-				nearConcert.disable();
-				nextConcert.disable();
-			}
-			else {
-				nearConcert.enable();
-				nextConcert.enable();
-			}
+			if (!value) concertLayout.disable();
+			else concertLayout.enable();
+		});
+
+		this.on(this.app, "form:table:data", (updatedAlbums, tableData) => {
+			this.updatedAlbums = updatedAlbums;
+			this.tableData = tableData;
 		});
 	}
 
 	urlChange() {
 		const form = this.$$("form");
-		const layout = this.$$("editableLayout");
+		const mainLayout = this.$$("mainLayout");
 
 		const groupId = this.getParam("groupId");
 
 		if (groupId) {
-			layout.enable();
-
 			const groupValue = groupsDB.getItem(groupId);
+
+			mainLayout.enable();
 			form.setValues(groupValue);
 		}
+	}
+
+	checkChanges() {
+		const form = this.$$("form");
+		const groupId = this.getParam("groupId");
+		const groupData = groupsDB.getItem(groupId);
+
+		const formValues = form.getValues();
+		delete formValues.Date;
+		delete formValues.files;
+
+		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
+		const formData = {...formValues, CreationDate: dateStr};
+
+		const dataKeys = Object.keys(formData);
+		let checkChanges = false;
+
+		for (let i = 0; i < dataKeys.length; i++) {
+			const key = dataKeys[i];
+			if (formData[key] !== groupData[key]) {
+				checkChanges = true;
+				break;
+			}
+		}
+	}
+
+	destroy() {
+		albumsDB.load(albumsURL);
+		this.dp.on();
 	}
 }

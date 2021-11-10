@@ -101,13 +101,10 @@ export default class Table extends JetView {
 	}
 
 	urlChange(view) {
-		albumsDB.waitData.then(() => {
-			const groupId = this.getParam("groupId");
+		const groupId = this.getParam("groupId");
 
-			view.data.sync(albumsDB, () => {
-				view.filter(obj => obj.GroupID === groupId);
-			});
-
+		view.data.sync(albumsDB, () => {
+			view.filter(obj => obj.GroupID === groupId);
 			this.initSelect(view);
 		});
 	}
