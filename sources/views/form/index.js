@@ -116,7 +116,7 @@ export default class Form extends JetView {
 					localId: "mainLayout",
 					rows: [
 						{margin: 15, cols: [{rows: formElems}, AlbumTable]},
-						{rows: [CancelBtn, SaveBtn]}
+						{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
 					]
 				},
 				{}
@@ -130,6 +130,7 @@ export default class Form extends JetView {
 		this.form = this.$$("form");
 
 		const concertLayout = this.$$("concertLayout");
+		const btnsLayout = this.$$("btnsLayout");
 		const groupName = this.$$("groupName");
 		const checkbox = this.$$("checkbox");
 
@@ -139,6 +140,11 @@ export default class Form extends JetView {
 			this.updatedAlbumsID = updatedAlbums;
 			this.deletedAlbumsID = deletedAlbums;
 			this.tableData = tableData;
+		});
+
+		this.on(this.app, "form:table:editorState", (state) => {
+			if (state) btnsLayout.disable();
+			else btnsLayout.enable();
 		});
 
 		this.dp.off();

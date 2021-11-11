@@ -53,6 +53,15 @@ export default class AlbumTable extends JetView {
 		const updatedAlbums = new Set();
 		const deletedAlbums = new Set();
 
+		this.on(view, "onAfterEditStart", () => {
+			this.app.callEvent("form:table:editorState", [true]);
+		});
+
+		this.on(view, "onAfterEditStop", () => {
+			this.app.callEvent("form:table:editorState", [false]);
+		});
+
+
 		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
 			if (id) {
 				if (mode === "update") updatedAlbums.add(id);
