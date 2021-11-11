@@ -56,12 +56,19 @@ export default class AlbumTable extends JetView {
 		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
 			if (id) {
 				if (mode === "update") updatedAlbums.add(id);
-				if (mode === "delete") deletedAlbums.add(id.row);
+				if (mode === "delete") {
+					deletedAlbums.add(id.row);
+
+					const checkUpdated = updatedAlbums.has(id.row);
+					if (checkUpdated) updatedAlbums.delete(id.row);
+				}
 			}
 		});
 
-
-		this.app.callEvent("form:table:data", [{updatedAlbums, deletedAlbums}, view.data]);
+		this.app.callEvent("form:table:data", [
+			{updatedAlbums, deletedAlbums},
+			view.data
+		]);
 	}
 
 	urlChange(view) {

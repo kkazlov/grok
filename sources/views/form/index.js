@@ -200,9 +200,6 @@ export default class Form extends JetView {
 
 	deleteAlbums() {
 		this.deletedAlbumsID.forEach((id) => {
-			const checkAlbum = this.updatedAlbumsID.has(id);
-			if (checkAlbum) this.updatedAlbumsID.delete(id);
-
 			albumsDB.remove(id);
 		});
 	}
@@ -240,6 +237,9 @@ export default class Form extends JetView {
 		webix.message(message);
 
 		this.dp.off();
+
+		this.deletedAlbumsID.clear();
+		this.updatedAlbumsID.clear();
 	}
 
 	restoreData() {
