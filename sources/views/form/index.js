@@ -133,6 +133,14 @@ export default class Form extends JetView {
 		const groupName = this.$$("groupName");
 		const checkbox = this.$$("checkbox");
 
+		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
+			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
+
+			this.updatedAlbumsID = updatedAlbums;
+			this.deletedAlbumsID = deletedAlbums;
+			this.tableData = tableData;
+		});
+
 		this.dp.off();
 
 		this.setParam("groupId", false, true);
@@ -146,11 +154,6 @@ export default class Form extends JetView {
 		this.on(checkbox, "onChange", (value) => {
 			if (!value) concertLayout.disable();
 			else concertLayout.enable();
-		});
-
-		this.on(this.app, "form:table:data", (updatedAlbumsID, tableData) => {
-			this.updatedAlbumsID = updatedAlbumsID;
-			this.tableData = tableData;
 		});
 	}
 
@@ -195,15 +198,20 @@ export default class Form extends JetView {
 		return checkChanges;
 	}
 
-	updateAlbums() {
-		this.dp.on();
+	deleteAlbums() {
+		this.deletedAlbumsID.forEach((id) => {
+			const checkAlbum = this.updatedAlbumsID.has(id);
+			if (checkAlbum) this.updatedAlbumsID.delete(id);
 
+			albumsDB.remove(id);
+		});
+	}
+
+	updateAlbums() {
 		this.updatedAlbumsID.forEach((id) => {
 			const album = this.tableData.getItem(id);
 			albumsDB.updateItem(id, album);
 		});
-
-		this.dp.off();
 	}
 
 	updateGroup() {
@@ -213,27 +221,44 @@ export default class Form extends JetView {
 
 	saveData() {
 		const checkForm = this.checkFormChanges();
-		const checkTable = this.updatedAlbumsID.size;
+		const checkTableUpdates = this.updatedAlbumsID.size;
+		const checkTableDeletes = this.deletedAlbumsID.size;
+
+		const checkTable = checkTableUpdates || checkTableDeletes;
+
+		this.dp.on();
 
 		if (checkForm) this.updateGroup();
-		if (checkTable) this.updateAlbums();
+		if (checkTableDeletes) this.deleteAlbums();
+		if (checkTableUpdates) this.updateAlbums();
+
 
 		const message = (checkForm || checkTable) ?
 			"The data has been updated" :
 			"No changes. Nothing to save";
 
 		webix.message(message);
+
+		this.dp.off();
 	}
 
 	restoreData() {
 		const checkForm = this.checkFormChanges();
-		const checkTable = this.updatedAlbumsID.size;
+		const checkTableUpdates = this.updatedAlbumsID.size;
+		const checkTableDeletes = this.deletedAlbumsID.size;
+
+		const checkTable = checkTableUpdates || checkTableDeletes;
 
 		if (checkForm) this.setFormData();
+
 		if (checkTable) {
-			albumsDB.load(albumsURL);
+			this.tableData.clearAll();
+			this.deletedAlbumsID.clear();
 			this.updatedAlbumsID.clear();
+
+			albumsDB.load(albumsURL);
 		}
+
 
 		const message = (checkForm || checkTable) ?
 			"The data has been restored" :

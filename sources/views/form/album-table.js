@@ -51,12 +51,17 @@ export default class AlbumTable extends JetView {
 
 	init(view) {
 		const updatedAlbums = new Set();
+		const deletedAlbums = new Set();
 
-		this.on(albumsDB.data, "onStoreUpdated", (id) => {
-			if (id) updatedAlbums.add(id);
+		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
+			if (id) {
+				if (mode === "update") updatedAlbums.add(id);
+				if (mode === "delete") deletedAlbums.add(id.row);
+			}
 		});
 
-		this.app.callEvent("form:table:data", [updatedAlbums, view.data]);
+
+		this.app.callEvent("form:table:data", [{updatedAlbums, deletedAlbums}, view.data]);
 	}
 
 	urlChange(view) {
@@ -72,13 +77,14 @@ export default class AlbumTable extends JetView {
 	}
 
 	deleteIcon(e, id) {
+		const table = this.$$("table");
 		webix
 			.confirm({
 				title: "Delete",
 				text: "Do you want to delete this record?"
 			})
 			.then(() => {
-				albumsDB.remove(id);
+				table.data.remove(id);
 			});
 	}
 }
