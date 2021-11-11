@@ -100,19 +100,7 @@ export default class Form extends JetView {
 			view: "button",
 			value: "Save",
 			css: "webix_primary",
-			click: () => {
-				const checkChanges = this.updatedAlbums.size;
-				if (checkChanges) {
-					this.dp.on();
-
-					this.updatedAlbums.forEach((albumID) => {
-						const album = this.tableData.getItem(albumID);
-						albumsDB.updateItem(albumID, album);
-					});
-
-					this.dp.off();
-				}
-			}
+			click: () => this.saveData()
 		};
 
 		return {
@@ -137,7 +125,9 @@ export default class Form extends JetView {
 
 	init() {
 		this.dp = webix.dp(albumsDB);
-		const mainLayout = this.$$("mainLayout");
+		this.mainLayout = this.$$("mainLayout");
+		this.form = this.$$("form");
+
 		const concertLayout = this.$$("concertLayout");
 		const groupName = this.$$("groupName");
 		const checkbox = this.$$("checkbox");
@@ -145,7 +135,7 @@ export default class Form extends JetView {
 		this.dp.off();
 		this.setParam("groupId", false, true);
 
-		mainLayout.disable();
+		this.mainLayout.disable();
 
 		this.on(groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
@@ -156,37 +146,35 @@ export default class Form extends JetView {
 			else concertLayout.enable();
 		});
 
-		this.on(this.app, "form:table:data", (updatedAlbums, tableData) => {
-			this.updatedAlbums = updatedAlbums;
+		this.on(this.app, "form:table:data", (updatedAlbumsID, tableData) => {
+			this.updatedAlbumsID = updatedAlbumsID;
 			this.tableData = tableData;
 		});
 	}
 
 	urlChange() {
-		const form = this.$$("form");
-		const mainLayout = this.$$("mainLayout");
+		this.groupId = this.getParam("groupId");
 
-		const groupId = this.getParam("groupId");
+		if (this.groupId) {
+			const groupValue = groupsDB.getItem(this.groupId);
 
-		if (groupId) {
-			const groupValue = groupsDB.getItem(groupId);
-
-			mainLayout.enable();
-			form.setValues(groupValue);
+			this.mainLayout.enable();
+			this.form.setValues(groupValue);
 		}
 	}
 
-	checkChanges() {
-		const form = this.$$("form");
-		const groupId = this.getParam("groupId");
-		const groupData = groupsDB.getItem(groupId);
-
-		const formValues = form.getValues();
+	getFormData() {
+		const formValues = this.form.getValues();
 		delete formValues.Date;
 		delete formValues.files;
 
 		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
-		const formData = {...formValues, CreationDate: dateStr};
+		return {...formValues, CreationDate: dateStr};
+	}
+
+	checkFormChanges() {
+		const groupData = groupsDB.getItem(this.groupId);
+		const formData = this.getFormData();
 
 		const dataKeys = Object.keys(formData);
 		let checkChanges = false;
@@ -198,6 +186,38 @@ export default class Form extends JetView {
 				break;
 			}
 		}
+
+		return checkChanges;
+	}
+
+	updateAlbums() {
+		this.dp.on();
+
+		this.updatedAlbumsID.forEach((id) => {
+			const album = this.tableData.getItem(id);
+			albumsDB.updateItem(id, album);
+		});
+
+		this.dp.off();
+	}
+
+	updateGroup() {
+		const formData = this.getFormData();
+		groupsDB.updateItem(this.groupId, formData);
+	}
+
+	saveData() {
+		const checkForm = this.checkFormChanges();
+		const checkTable = this.updatedAlbumsID.size;
+
+		if (checkForm) this.updateGroup();
+		if (checkTable) this.updateAlbums();
+
+		const message = (checkForm || checkTable) ?
+			"The data has been updated" :
+			"No changes. Nothing to save";
+
+		webix.message(message);
 	}
 
 	destroy() {
