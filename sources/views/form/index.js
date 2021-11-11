@@ -93,7 +93,8 @@ export default class Form extends JetView {
 
 		const CancelBtn = {
 			view: "button",
-			value: "Cancel"
+			value: "Cancel",
+			click: () => this.restoreData()
 		};
 
 		const SaveBtn = {
@@ -133,6 +134,7 @@ export default class Form extends JetView {
 		const checkbox = this.$$("checkbox");
 
 		this.dp.off();
+
 		this.setParam("groupId", false, true);
 
 		this.mainLayout.disable();
@@ -156,11 +158,14 @@ export default class Form extends JetView {
 		this.groupId = this.getParam("groupId");
 
 		if (this.groupId) {
-			const groupValue = groupsDB.getItem(this.groupId);
-
+			this.setFormData();
 			this.mainLayout.enable();
-			this.form.setValues(groupValue);
 		}
+	}
+
+	setFormData() {
+		const groupValue = groupsDB.getItem(this.groupId);
+		this.form.setValues(groupValue);
 	}
 
 	getFormData() {
@@ -216,6 +221,23 @@ export default class Form extends JetView {
 		const message = (checkForm || checkTable) ?
 			"The data has been updated" :
 			"No changes. Nothing to save";
+
+		webix.message(message);
+	}
+
+	restoreData() {
+		const checkForm = this.checkFormChanges();
+		const checkTable = this.updatedAlbumsID.size;
+
+		if (checkForm) this.setFormData();
+		if (checkTable) {
+			albumsDB.load(albumsURL);
+			this.updatedAlbumsID.clear();
+		}
+
+		const message = (checkForm || checkTable) ?
+			"The data has been restored" :
+			"No changes. Nothing to cancel";
 
 		webix.message(message);
 	}
