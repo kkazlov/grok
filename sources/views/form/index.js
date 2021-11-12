@@ -15,6 +15,243 @@ export default class Form extends JetView {
 			options: groupsDB
 		};
 
+		const CancelBtn = {
+			view: "button",
+			value: "Cancel",
+			click: () => this.restoreData()
+		};
+
+		const SaveBtn = {
+			view: "button",
+			value: "Save",
+			css: "webix_primary",
+			click: () => this.saveData()
+		};
+
+		return {
+			localId: "form",
+			view: "form",
+			margin: 30,
+			elementsConfig: {labelWidth: 150},
+			elements: [
+				GroupElem,
+				{
+					margin: 30,
+					localId: "mainLayout",
+					rows: [
+						{margin: 15, cols: [{rows: this.FormElems()}, AlbumTable]},
+						{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
+					]
+				},
+				{}
+			]
+		};
+	}
+
+	init() {
+		this.dp = webix.dp(albumsDB);
+		this.mainLayout = this.$$("mainLayout");
+		this.form = this.$$("form");
+		this.uploader = this.$$("uploader");
+
+		const concertLayout = this.$$("concertLayout");
+		const btnsLayout = this.$$("btnsLayout");
+
+		const groupName = this.$$("groupName");
+		const checkbox = this.$$("checkbox");
+
+		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
+			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
+
+			this.updatedAlbumsID = updatedAlbums;
+			this.deletedAlbumsID = deletedAlbums;
+			this.tableData = tableData;
+		});
+
+		this.dp.off();
+
+		this.setParam("groupId", false, true);
+
+		this.mainLayout.disable();
+
+		this.on(this.app, "form:table:editorState", (state) => {
+			if (state) btnsLayout.disable();
+			else btnsLayout.enable();
+		});
+
+		this.on(groupName, "onChange", (value) => {
+			this.setParam("groupId", value, true);
+		});
+
+		this.on(checkbox, "onChange", (value) => {
+			if (!value) concertLayout.disable();
+			else concertLayout.enable();
+		});
+
+		this.on(this.uploader, "onUploadComplete", () => {
+			this.uploader.files.clearAll();
+		});
+	}
+
+	urlChange() {
+		this.groupId = this.getParam("groupId");
+
+		if (this.groupId) {
+			this.setFormData();
+			this.mainLayout.enable();
+		}
+	}
+
+	destroy() {
+		albumsDB.load(albumsURL);
+		this.dp.on();
+	}
+
+	setFormData() {
+		const groupValue = groupsDB.getItem(this.groupId);
+		this.form.setValues(groupValue);
+	}
+
+	getFormData() {
+		const formValues = this.form.getValues();
+		delete formValues.Date;
+
+		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
+		return {...formValues, CreationDate: dateStr};
+	}
+
+	checkFormChanges() {
+		const _checkForm = () => {
+			const groupData = groupsDB.getItem(this.groupId);
+			const formData = this.getFormData();
+
+			const dataKeys = Object.keys(formData);
+			let checkForm = false;
+
+			for (let i = 0; i < dataKeys.length; i++) {
+				const key = dataKeys[i];
+				if (formData[key] !== groupData[key]) {
+					checkForm = true;
+					break;
+				}
+			}
+
+			return checkForm;
+		};
+
+		const checkForm = _checkForm();
+		const checkTableUpdates = this.updatedAlbumsID.size;
+		const checkTableDeletes = this.deletedAlbumsID.size;
+		const checkFile = this.uploader.files.data.count();
+
+		const checkTable = checkTableUpdates || checkTableDeletes;
+		const checkAll = checkForm || checkTable || checkFile;
+
+		return {
+			checkForm,
+			checkTableUpdates,
+			checkTableDeletes,
+			checkTable,
+			checkFile,
+			checkAll
+		};
+	}
+
+	updateGroup() {
+		const formData = this.getFormData();
+		groupsDB.updateItem(this.groupId, formData);
+	}
+
+	deleteAlbums() {
+		this.deletedAlbumsID.forEach((id) => {
+			albumsDB.remove(id);
+		});
+	}
+
+	updateAlbums() {
+		this.updatedAlbumsID.forEach((id) => {
+			const album = this.tableData.getItem(id);
+			albumsDB.updateItem(id, album);
+		});
+	}
+
+	sendFile() {
+		this.uploader.files.data.each((obj) => {
+			const {file, name, id} = obj;
+
+			obj.formData = {
+				GroupID: this.groupId,
+				File: file,
+				Name: name
+			};
+			this.uploader.send(id);
+		});
+	}
+
+	message(check, type) {
+		const ok = type === "save" ? "updated" : "restore";
+		const fail = type === "save" ? "save" : "cancel";
+
+		const message = check ?
+			`The data has been ${ok}` :
+			`No changes. Nothing to ${fail}`;
+
+		webix.message(message);
+	}
+
+	clearChangedAlbums() {
+		this.deletedAlbumsID.clear();
+		this.updatedAlbumsID.clear();
+	}
+
+	refreshTableData() {
+		this.tableData.clearAll();
+		this.clearChangedAlbums();
+		albumsDB.load(albumsURL);
+	}
+
+	saveData() {
+		const checkFormChanges = this.checkFormChanges();
+		const {
+			checkForm,
+			checkTableUpdates,
+			checkTableDeletes,
+			checkFile,
+			checkAll
+		} = checkFormChanges;
+
+		this.dp.on();
+
+		if (checkForm) this.updateGroup();
+		if (checkTableDeletes) this.deleteAlbums();
+		if (checkTableUpdates) this.updateAlbums();
+		if (checkFile) this.sendFile();
+
+		this.message(checkAll, "save");
+
+		this.dp.off();
+
+		this.clearChangedAlbums();
+	}
+
+	restoreData() {
+		const checkFormChanges = this.checkFormChanges();
+		const {
+			checkForm,
+			checkTable,
+			checkFile,
+			checkAll
+		} = checkFormChanges;
+
+		if (checkForm) this.setFormData();
+		if (checkTable) this.refreshTableData();
+		if (checkFile) this.uploader.files.clearAll();
+
+		this.message(checkAll, "restore");
+	}
+
+
+	FormElems() {
 		const StyleElem = {
 			view: "combo",
 			label: "Style",
@@ -77,7 +314,7 @@ export default class Form extends JetView {
 			type: "uploader"
 		};
 
-		const formElems = [
+		return [
 			StyleElem,
 			CreationDateElem,
 			CountryElem,
@@ -89,210 +326,5 @@ export default class Form extends JetView {
 			UploaderElem,
 			UploaderListElem
 		];
-
-		const CancelBtn = {
-			view: "button",
-			value: "Cancel",
-			click: () => this.restoreData()
-		};
-
-		const SaveBtn = {
-			view: "button",
-			value: "Save",
-			css: "webix_primary",
-			click: () => this.saveData()
-		};
-
-		return {
-			localId: "form",
-			view: "form",
-			margin: 30,
-			elementsConfig: {labelWidth: 150},
-			elements: [
-				GroupElem,
-				{
-					margin: 30,
-					localId: "mainLayout",
-					rows: [
-						{margin: 15, cols: [{rows: formElems}, AlbumTable]},
-						{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
-					]
-				},
-				{}
-			]
-		};
-	}
-
-	init() {
-		this.dp = webix.dp(albumsDB);
-		this.mainLayout = this.$$("mainLayout");
-		this.form = this.$$("form");
-		this.uploader = this.$$("uploader");
-
-		const concertLayout = this.$$("concertLayout");
-		const btnsLayout = this.$$("btnsLayout");
-		const groupName = this.$$("groupName");
-		const checkbox = this.$$("checkbox");
-
-		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
-			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
-
-			this.updatedAlbumsID = updatedAlbums;
-			this.deletedAlbumsID = deletedAlbums;
-			this.tableData = tableData;
-		});
-
-		this.dp.off();
-
-		this.setParam("groupId", false, true);
-
-		this.mainLayout.disable();
-
-		this.on(this.app, "form:table:editorState", (state) => {
-			if (state) btnsLayout.disable();
-			else btnsLayout.enable();
-		});
-
-		this.on(groupName, "onChange", (value) => {
-			this.setParam("groupId", value, true);
-		});
-
-		this.on(checkbox, "onChange", (value) => {
-			if (!value) concertLayout.disable();
-			else concertLayout.enable();
-		});
-
-		this.on(this.uploader, "onUploadComplete", () => {
-			this.uploader.files.clearAll();
-		});
-	}
-
-	urlChange() {
-		this.groupId = this.getParam("groupId");
-
-		if (this.groupId) {
-			this.setFormData();
-			this.mainLayout.enable();
-		}
-	}
-
-	setFormData() {
-		const groupValue = groupsDB.getItem(this.groupId);
-		this.form.setValues(groupValue);
-	}
-
-	getFormData() {
-		const formValues = this.form.getValues();
-		delete formValues.Date;
-
-		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
-		return {...formValues, CreationDate: dateStr};
-	}
-
-	checkFormChanges() {
-		const groupData = groupsDB.getItem(this.groupId);
-		const formData = this.getFormData();
-
-		const dataKeys = Object.keys(formData);
-		let checkChanges = false;
-
-		for (let i = 0; i < dataKeys.length; i++) {
-			const key = dataKeys[i];
-			if (formData[key] !== groupData[key]) {
-				checkChanges = true;
-				break;
-			}
-		}
-
-		return checkChanges;
-	}
-
-	deleteAlbums() {
-		this.deletedAlbumsID.forEach((id) => {
-			albumsDB.remove(id);
-		});
-	}
-
-	updateAlbums() {
-		this.updatedAlbumsID.forEach((id) => {
-			const album = this.tableData.getItem(id);
-			albumsDB.updateItem(id, album);
-		});
-	}
-
-	updateGroup() {
-		const formData = this.getFormData();
-		groupsDB.updateItem(this.groupId, formData);
-	}
-
-	sendFile() {
-		this.uploader.files.data.each((obj) => {
-			const {file, name, id} = obj;
-
-			obj.formData = {
-				GroupID: this.groupId,
-				File: file,
-				Name: name
-			};
-			this.uploader.send(id);
-		});
-	}
-
-	saveData() {
-		const checkForm = this.checkFormChanges();
-		const checkTableUpdates = this.updatedAlbumsID.size;
-		const checkTableDeletes = this.deletedAlbumsID.size;
-		const checkFile = this.uploader.files.data.count();
-
-		const checkTable = checkTableUpdates || checkTableDeletes;
-
-		this.dp.on();
-
-		if (checkForm) this.updateGroup();
-		if (checkTableDeletes) this.deleteAlbums();
-		if (checkTableUpdates) this.updateAlbums();
-		if (checkFile) this.sendFile();
-
-
-		const message = (checkForm || checkTable || checkFile) ?
-			"The data has been updated" :
-			"No changes. Nothing to save";
-
-		webix.message(message);
-
-		this.dp.off();
-
-		this.deletedAlbumsID.clear();
-		this.updatedAlbumsID.clear();
-	}
-
-	restoreData() {
-		const checkForm = this.checkFormChanges();
-		const checkTableUpdates = this.updatedAlbumsID.size;
-		const checkTableDeletes = this.deletedAlbumsID.size;
-
-		const checkTable = checkTableUpdates || checkTableDeletes;
-
-		if (checkForm) this.setFormData();
-
-		if (checkTable) {
-			this.tableData.clearAll();
-			this.deletedAlbumsID.clear();
-			this.updatedAlbumsID.clear();
-
-			albumsDB.load(albumsURL);
-		}
-
-
-		const message = (checkForm || checkTable) ?
-			"The data has been restored" :
-			"No changes. Nothing to cancel";
-
-		webix.message(message);
-	}
-
-	destroy() {
-		albumsDB.load(albumsURL);
-		this.dp.on();
 	}
 }
