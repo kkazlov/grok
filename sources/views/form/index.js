@@ -2,9 +2,11 @@ import {JetView} from "webix-jet";
 
 import {albumsURL, filesURL} from "../../config/urls";
 import albumsDB from "../../models/albumsDB";
+import filesDB from "../../models/filesDB";
 import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
+import FilesTable from "./files-table";
 
 export default class Form extends JetView {
 	config() {
@@ -39,7 +41,13 @@ export default class Form extends JetView {
 					margin: 30,
 					localId: "mainLayout",
 					rows: [
-						{margin: 15, cols: [{rows: this.FormElems()}, AlbumTable]},
+						{
+							margin: 15,
+							cols: [
+								{rows: this.FormElems()},
+								{rows: [AlbumTable, FilesTable]}
+							]
+						},
 						{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
 					]
 				},
@@ -90,6 +98,7 @@ export default class Form extends JetView {
 
 		this.on(this.uploader, "onUploadComplete", () => {
 			this.uploader.files.clearAll();
+			filesDB.load(filesURL);
 		});
 	}
 
@@ -99,6 +108,7 @@ export default class Form extends JetView {
 		if (this.groupId) {
 			this.setFormData();
 			this.mainLayout.enable();
+			this.uploader.files.clearAll();
 		}
 	}
 
@@ -299,7 +309,7 @@ export default class Form extends JetView {
 		const UploaderElem = {
 			view: "uploader",
 			localId: "uploader",
-			value: "Upload a file",
+			value: "Add a file",
 			link: "doclist",
 			upload: filesURL,
 			multiple: false,
