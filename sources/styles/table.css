@@ -7,10 +7,6 @@
 
 }
 
-.table-icon span:hover {
-	color: blue;
-}
-
 .webix_cell {
 	text-overflow: ellipsis;
 }

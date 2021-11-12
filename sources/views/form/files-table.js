@@ -1,6 +1,6 @@
 import {JetView} from "webix-jet";
 
-import {filesURL} from "../../config/urls";
+import {filesURL, host} from "../../config/urls";
 import filesDB from "../../models/filesDB";
 
 export default class FilesTable extends JetView {
@@ -12,9 +12,8 @@ export default class FilesTable extends JetView {
 				{
 					id: "download",
 					header: "",
-					template: () => "<span>Download</span>",
+					template: obj => `<a href="${host}${obj.File}" download>Download</a>`,
 					fillspace: 3,
-					css: "table-icon downloadCol",
 					tooltip: false
 				},
 				{
@@ -27,7 +26,10 @@ export default class FilesTable extends JetView {
 				}
 			],
 			css: "webix_data_border webix_header_border",
-			tooltip: true
+			tooltip: true,
+			onClick: {
+				deleteIcon: (e, id) => this.deleteIcon(e, id)
+			}
 
 		};
 	}
@@ -42,5 +44,22 @@ export default class FilesTable extends JetView {
 				view.filter(obj => obj.GroupID === groupId);
 			});
 		}
+	}
+
+	/* downloadCol(e, id) {
+		if (e.target.tagName === "A") {
+
+		}
+	} */
+
+	deleteIcon(e, id) {
+		webix
+			.confirm({
+				title: "Delete",
+				text: "Do you want to delete this file? WARNING! You will not be able to restore this file!"
+			})
+			.then(() => {
+				filesDB.remove(id);
+			});
 	}
 }
