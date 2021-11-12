@@ -27,14 +27,24 @@ export default class Form extends JetView {
 			view: "button",
 			value: "Save",
 			css: "webix_primary",
-			click: () => this.saveData()
+			click: () => {
+				const validation = this.form.validate();
+				if (validation) this.saveData();
+			}
 		};
+
+		const rule = value => webix.rules.isNotEmpty(value) && value.toString().length <= 30;
 
 		return {
 			localId: "form",
 			view: "form",
 			margin: 30,
 			elementsConfig: {labelWidth: 150},
+			rules: {
+				Country: value => rule(value),
+				NearConcert: value => !this.checboxValue || rule(value),
+				NextConcert: value => !this.checboxValue || rule(value)
+			},
 			elements: [
 				GroupElem,
 				{
@@ -52,7 +62,12 @@ export default class Form extends JetView {
 					]
 				},
 				{}
-			]
+			],
+			on: {
+				onChange() {
+					this.clearValidation();
+				}
+			}
 		};
 	}
 
@@ -92,6 +107,8 @@ export default class Form extends JetView {
 		});
 
 		this.on(checkbox, "onChange", (value) => {
+			this.checboxValue = value;
+
 			if (!value) concertLayout.disable();
 			else concertLayout.enable();
 		});
@@ -169,7 +186,12 @@ export default class Form extends JetView {
 
 	updateGroup() {
 		const formData = this.getFormData();
-		groupsDB.updateItem(this.groupId, formData);
+		const sendData = !this.checboxValue ?
+			{...formData, NearConcert: "", NextConcert: ""} :
+			formData;
+
+		groupsDB.updateItem(this.groupId, sendData);
+		this.setFormData();
 	}
 
 	deleteAlbums() {
@@ -266,7 +288,6 @@ export default class Form extends JetView {
 			view: "combo",
 			label: "Style",
 			options: stylesDB,
-			required: true,
 			name: "Style"
 		};
 
@@ -282,7 +303,8 @@ export default class Form extends JetView {
 		const CountryElem = {
 			view: "text",
 			label: "Country",
-			name: "Country"
+			name: "Country",
+			required: true
 		};
 
 		const CheckboxElem = {

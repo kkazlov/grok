@@ -12,7 +12,11 @@ export default class FilesTable extends JetView {
 				{
 					id: "download",
 					header: "",
-					template: obj => `<a href="${host}${obj.File}" download>Download</a>`,
+					template: obj => `
+						<a href="${host}${obj.File}" download>
+							Download
+						</a>
+					`,
 					fillspace: 3,
 					tooltip: false
 				},
