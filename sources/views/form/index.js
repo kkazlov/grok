@@ -1,6 +1,6 @@
 import {JetView} from "webix-jet";
 
-import {albumsURL} from "../../config/urls";
+import {albumsURL, filesURL} from "../../config/urls";
 import albumsDB from "../../models/albumsDB";
 import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
@@ -61,12 +61,12 @@ export default class Form extends JetView {
 
 		const UploaderElem = {
 			view: "uploader",
-			localId: "files",
-			name: "files",
+			localId: "uploader",
 			value: "Upload a file",
 			link: "doclist",
+			upload: filesURL,
 			multiple: false,
-			autosend: false // обратите внимание!
+			autosend: false
 		};
 
 		const UploaderListElem = {
@@ -127,6 +127,7 @@ export default class Form extends JetView {
 		this.dp = webix.dp(albumsDB);
 		this.mainLayout = this.$$("mainLayout");
 		this.form = this.$$("form");
+		this.uploader = this.$$("uploader");
 
 		const concertLayout = this.$$("concertLayout");
 		const btnsLayout = this.$$("btnsLayout");
@@ -160,6 +161,10 @@ export default class Form extends JetView {
 			if (!value) concertLayout.disable();
 			else concertLayout.enable();
 		});
+
+		this.on(this.uploader, "onUploadComplete", () => {
+			this.uploader.files.clearAll();
+		});
 	}
 
 	urlChange() {
@@ -179,7 +184,6 @@ export default class Form extends JetView {
 	getFormData() {
 		const formValues = this.form.getValues();
 		delete formValues.Date;
-		/* delete formValues.files; */
 
 		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
 		return {...formValues, CreationDate: dateStr};
@@ -221,12 +225,24 @@ export default class Form extends JetView {
 		groupsDB.updateItem(this.groupId, formData);
 	}
 
+	sendFile() {
+		this.uploader.files.data.each((obj) => {
+			const {file, name, id} = obj;
+
+			obj.formData = {
+				GroupID: this.groupId,
+				File: file,
+				Name: name
+			};
+			this.uploader.send(id);
+		});
+	}
+
 	saveData() {
-		const uploader = this.$$("files");
-		console.log(uploader.files)
-		/* const checkForm = this.checkFormChanges();
+		const checkForm = this.checkFormChanges();
 		const checkTableUpdates = this.updatedAlbumsID.size;
 		const checkTableDeletes = this.deletedAlbumsID.size;
+		const checkFile = this.uploader.files.data.count();
 
 		const checkTable = checkTableUpdates || checkTableDeletes;
 
@@ -235,9 +251,10 @@ export default class Form extends JetView {
 		if (checkForm) this.updateGroup();
 		if (checkTableDeletes) this.deleteAlbums();
 		if (checkTableUpdates) this.updateAlbums();
+		if (checkFile) this.sendFile();
 
 
-		const message = (checkForm || checkTable) ?
+		const message = (checkForm || checkTable || checkFile) ?
 			"The data has been updated" :
 			"No changes. Nothing to save";
 
@@ -246,7 +263,7 @@ export default class Form extends JetView {
 		this.dp.off();
 
 		this.deletedAlbumsID.clear();
-		this.updatedAlbumsID.clear(); */
+		this.updatedAlbumsID.clear();
 	}
 
 	restoreData() {
