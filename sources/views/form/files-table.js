@@ -50,12 +50,6 @@ export default class FilesTable extends JetView {
 		}
 	}
 
-	/* downloadCol(e, id) {
-		if (e.target.tagName === "A") {
-
-		}
-	} */
-
 	deleteIcon(e, id) {
 		webix
 			.confirm({
