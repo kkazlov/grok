@@ -72,7 +72,7 @@ class ServicesConstr {
 	async deleteWithFile(id) {
 		if (!id) throw new Error("No ID");
 		const selectedData = await this.model.findById(id);
-		filesService.deleteFile(selectedData.Photo);
+		filesService.deleteFile(selectedData.File);
 
 		const data = await this.model.findByIdAndDelete(id);
 		return data;

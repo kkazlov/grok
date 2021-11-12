@@ -38,14 +38,14 @@ export default class Info extends JetView {
 
 		const {
 			Name: albumName,
-			Photo,
+			File,
 			Awards,
 			TrackList,
 			groupName
 		} = obj;
 
 		const emptyPhoto = "https://via.placeholder.com/550";
-		const photoURl = Photo ? `${host}${Photo}` : emptyPhoto;
+		const photoURl = File ? `${host}${File}` : emptyPhoto;
 
 		const tracks = TrackList
 			.map(item => `<li>${item}</li>`)
@@ -57,11 +57,11 @@ export default class Info extends JetView {
 					<h2>${groupName}</h2>
 					<h3>${albumName}</h3>
 				</div>
-				
+
 				<div class="info__photo">
 					<img src=${photoURl} onError='src="${emptyPhoto}"' alt="Cover">
 				</div>
-				
+
 				<div class="info__tracklist">
 					<h4>Track-list</h4>
 					<ol>${tracks}</ol>

@@ -61,6 +61,21 @@ export default class AlbumTable extends JetView {
 			this.app.callEvent("form:table:editorState", [false]);
 		});
 
+		this.on(view, "onBeforeEditStop", (state, editor, ignore) => {
+			const value = editor.getValue();
+
+			if (editor.column === "ReleseDate") {
+				state.value = webix.Date.dateToStr("%Y-%m-%d")(value);
+			}
+
+			/* const check = (value !== "" && value.length <= 30);
+			if (!ignore && !check) {
+				view.validateEditor(editor);
+				return false;
+			}
+			return true; */
+		});
+
 
 		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
 			if (id) {

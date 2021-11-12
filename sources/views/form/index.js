@@ -61,7 +61,6 @@ export default class Form extends JetView {
 
 		const UploaderElem = {
 			view: "uploader",
-			upload: "//docs.webix.com/samples/server/upload",
 			localId: "files",
 			name: "files",
 			value: "Upload a file",
@@ -142,16 +141,16 @@ export default class Form extends JetView {
 			this.tableData = tableData;
 		});
 
-		this.on(this.app, "form:table:editorState", (state) => {
-			if (state) btnsLayout.disable();
-			else btnsLayout.enable();
-		});
-
 		this.dp.off();
 
 		this.setParam("groupId", false, true);
 
 		this.mainLayout.disable();
+
+		this.on(this.app, "form:table:editorState", (state) => {
+			if (state) btnsLayout.disable();
+			else btnsLayout.enable();
+		});
 
 		this.on(groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
@@ -180,7 +179,7 @@ export default class Form extends JetView {
 	getFormData() {
 		const formValues = this.form.getValues();
 		delete formValues.Date;
-		delete formValues.files;
+		/* delete formValues.files; */
 
 		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
 		return {...formValues, CreationDate: dateStr};
@@ -223,7 +222,9 @@ export default class Form extends JetView {
 	}
 
 	saveData() {
-		const checkForm = this.checkFormChanges();
+		const uploader = this.$$("files");
+		console.log(uploader.files)
+		/* const checkForm = this.checkFormChanges();
 		const checkTableUpdates = this.updatedAlbumsID.size;
 		const checkTableDeletes = this.deletedAlbumsID.size;
 
@@ -245,7 +246,7 @@ export default class Form extends JetView {
 		this.dp.off();
 
 		this.deletedAlbumsID.clear();
-		this.updatedAlbumsID.clear();
+		this.updatedAlbumsID.clear(); */
 	}
 
 	restoreData() {

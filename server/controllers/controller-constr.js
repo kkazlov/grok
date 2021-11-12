@@ -15,7 +15,7 @@ class ControllerConstr {
 
 	async createWithFile(req, res) {
 		try {
-			const data = await this.service.createWithFile(req.body, req.files, "Photo");
+			const data = await this.service.createWithFile(req.body, req.files, "File");
 			res.json(data);
 		}
 		catch (error) {
