@@ -76,12 +76,12 @@ export default class Form extends JetView {
 		this.mainLayout = this.$$("mainLayout");
 		this.form = this.$$("form");
 		this.uploader = this.$$("uploader");
+		this.groupName = this.$$("groupName");
 
 		const concertLayout = this.$$("concertLayout");
 		const btnsLayout = this.$$("btnsLayout");
-
-		const groupName = this.$$("groupName");
 		const checkbox = this.$$("checkbox");
+
 
 		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
 			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
@@ -93,16 +93,14 @@ export default class Form extends JetView {
 
 		this.dp.off();
 
-		this.setParam("groupId", false, true);
-
-		this.mainLayout.disable();
+		this.setInitGroup();
 
 		this.on(this.app, "form:table:editorState", (state) => {
 			if (state) btnsLayout.disable();
 			else btnsLayout.enable();
 		});
 
-		this.on(groupName, "onChange", (value) => {
+		this.on(this.groupName, "onChange", (value) => {
 			this.setParam("groupId", value, true);
 		});
 
@@ -122,11 +120,15 @@ export default class Form extends JetView {
 	urlChange() {
 		this.groupId = this.getParam("groupId");
 
-		if (this.groupId) {
-			this.setFormData();
-			this.mainLayout.enable();
-			this.uploader.files.clearAll();
-		}
+		groupsDB.waitData.then(() => {
+			const isGroupID = groupsDB.getIndexById(this.groupId) > -1;
+
+			if (isGroupID) {
+				this.setFormData();
+				this.mainLayout.enable();
+				this.uploader.files.clearAll();
+			}
+		});
 	}
 
 	destroy() {
@@ -134,9 +136,24 @@ export default class Form extends JetView {
 		this.dp.on();
 	}
 
+	setInitGroup() {
+		groupsDB.waitData.then(() => {
+			const initGroupId = this.getParam("groupId");
+			const isGroupID = groupsDB.getIndexById(initGroupId) > -1;
+
+			if (isGroupID) this.groupName.setValue(initGroupId);
+			else {
+				this.setParam("groupId", "", true);
+				this.mainLayout.disable();
+			}
+		});
+	}
+
 	setFormData() {
-		const groupValue = groupsDB.getItem(this.groupId);
-		this.form.setValues(groupValue);
+		groupsDB.waitData.then(() => {
+			const groupValue = groupsDB.getItem(this.groupId);
+			this.form.setValues(groupValue);
+		});
 	}
 
 	getFormData() {
