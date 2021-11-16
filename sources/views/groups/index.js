@@ -80,6 +80,7 @@ export default class Groups extends JetView {
 	}
 
 	init() {
+		groupsDB.load(groupsURL);
 		this._popup = this.ui(Popup);
 		const table = this.$$("table");
 

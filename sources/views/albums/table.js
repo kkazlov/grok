@@ -1,8 +1,6 @@
 import {JetView} from "webix-jet";
 
-import {groupsURL} from "../../config/urls";
 import albumsDB from "../../models/albumsDB";
-import groupsDB from "../../models/groupsDB";
 
 export default class Table extends JetView {
 	config() {
@@ -132,7 +130,6 @@ export default class Table extends JetView {
 		}).then(() => {
 			albumsDB.remove(id);
 			this.initSelect(table);
-			groupsDB.load(groupsURL);
 		});
 	}
 }
