@@ -85,7 +85,6 @@ export default class Form extends JetView {
 
 		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
 			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
-
 			this.updatedAlbumsID = updatedAlbums;
 			this.deletedAlbumsID = deletedAlbums;
 			this.tableData = tableData;

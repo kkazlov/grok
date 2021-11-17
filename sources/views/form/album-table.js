@@ -5,7 +5,6 @@ import albumsDB from "../../models/albumsDB";
 
 export default class AlbumTable extends JetView {
 	config() {
-		const rule = value => webix.rules.isNotEmpty(value) && value.toString().length <= 30;
 		return {
 			view: "datatable",
 			localId: "table",
@@ -13,10 +12,10 @@ export default class AlbumTable extends JetView {
 			rules: {
 				$all: (value, fields, name) => {
 					if (name === "Name" || name === "ReleseDate") {
-						return rule(value);
+						return this.validRule(value);
 					}
 					if (name === "CopiesNumber") {
-						return rule(value) && webix.rules.isNumber(value);
+						return this.copiesRule(value);
 					}
 					return true;
 				}
@@ -56,7 +55,7 @@ export default class AlbumTable extends JetView {
 			],
 			css: "webix_data_border webix_header_border custom-table",
 			onClick: {
-				deleteIcon: (e, id) => this.deleteIcon(e, id)
+				deleteIcon: (e, id) => this.deleteIcon(id)
 			}
 		};
 	}
@@ -79,13 +78,21 @@ export default class AlbumTable extends JetView {
 
 		this.on(view, "onBeforeEditStop", (state, editor, ignore) => {
 			const value = editor.getValue();
+			const columnName = editor.column;
 
-			if (editor.column === "ReleseDate") {
+			if (columnName === "ReleseDate") {
 				state.value = webix.Date.dateToStr("%Y-%m-%d")(value);
 			}
 
-			const check = (value !== "" && value.length <= 30);
-			if (!ignore && !check) {
+			if (columnName === "Name") {
+				state.value = value.trim();
+			}
+
+			const isValid = columnName !== "CopiesNumber" ?
+				this.validRule(value) :
+				this.copiesRule(value);
+
+			if (!ignore && !isValid) {
 				view.validateEditor(editor);
 				return false;
 			}
@@ -96,12 +103,18 @@ export default class AlbumTable extends JetView {
 		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
 			if (id) {
 				if (mode === "update") updatedAlbums.add(id);
+
 				if (mode === "delete") {
 					deletedAlbums.add(id.row);
 
 					const checkUpdated = updatedAlbums.has(id.row);
 					if (checkUpdated) updatedAlbums.delete(id.row);
 				}
+
+				this.app.callEvent("form:table:data", [
+					{updatedAlbums, deletedAlbums},
+					view.data
+				]);
 			}
 		});
 
@@ -123,7 +136,20 @@ export default class AlbumTable extends JetView {
 		}
 	}
 
-	deleteIcon(e, id) {
+	validRule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
+	}
+
+	copiesRule(value) {
+		return this.validRule(value) &&
+			webix.rules.isNumber(value);
+	}
+
+	deleteIcon(id) {
 		const table = this.$$("table");
 		webix
 			.confirm({
