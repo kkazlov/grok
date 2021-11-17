@@ -20,7 +20,10 @@ export default class Form extends JetView {
 		const CancelBtn = {
 			view: "button",
 			value: "Cancel",
-			click: () => this.restoreData()
+			click: () => {
+				this.restoreData();
+				this.form.clearValidation();
+			}
 		};
 
 		const SaveBtn = {
@@ -33,7 +36,13 @@ export default class Form extends JetView {
 			}
 		};
 
-		const rule = value => webix.rules.isNotEmpty(value) && value.toString().length <= 30;
+		const rule = (value) => {
+			const isEmpty = webix.rules.isNotEmpty(value);
+			const isLong = value.toString().length <= 30;
+			const isNotOnlySpace = /\S/g.test(value);
+
+			return isEmpty && isLong && isNotOnlySpace;
+		};
 
 		return {
 			localId: "form",

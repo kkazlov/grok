@@ -74,9 +74,9 @@ export default class Popup extends JetView {
 					{margin: 10, cols: [{}, actionBtn, cancelBtn]}
 				],
 				rules: {
-					Name: value => value.length <= 30,
-					Style: value => value.length <= 30,
-					Country: value => value.length <= 30
+					Name: value => this.validRule(value),
+					Style: value => this.validRule(value),
+					Country: value => this.validRule(value)
 				},
 				elementsConfig: {
 					labelWidth: 120,
@@ -128,6 +128,14 @@ export default class Popup extends JetView {
 	hideWindow() {
 		this.$$("window").hide();
 		this.app.callEvent("groups:popup:hide");
+	}
+
+	validRule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 }
 
