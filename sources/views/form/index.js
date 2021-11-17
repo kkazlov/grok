@@ -120,20 +120,32 @@ export default class Form extends JetView {
 	urlChange() {
 		this.groupId = this.getParam("groupId");
 
-		groupsDB.waitData.then(() => {
-			const isGroupID = groupsDB.getIndexById(this.groupId) > -1;
+		if (this.groupId) {
+			groupsDB.waitData.then(() => {
+				const isGroupID = groupsDB.getIndexById(this.groupId) > -1;
 
-			if (isGroupID) {
-				this.setFormData();
-				this.mainLayout.enable();
-				this.uploader.files.clearAll();
-			}
-		});
+				if (isGroupID) this.enableForm();
+				else this.disableForm();
+			});
+		}
 	}
 
 	destroy() {
 		albumsDB.load(albumsURL);
 		this.dp.on();
+	}
+
+	enableForm() {
+		this.setFormData();
+		this.uploader.files.clearAll();
+		this.mainLayout.enable();
+	}
+
+	disableForm() {
+		this.setParam("groupId", "", true);
+		this.form.clear();
+		this.groupName.setValue("");
+		this.mainLayout.disable();
 	}
 
 	setInitGroup() {
