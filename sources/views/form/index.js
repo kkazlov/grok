@@ -1,7 +1,6 @@
 import {JetView} from "webix-jet";
 
 import {albumsURL, filesURL} from "../../config/urls";
-import albumsDB from "../../models/albumsDB";
 import filesDB from "../../models/filesDB";
 import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
@@ -81,7 +80,6 @@ export default class Form extends JetView {
 	}
 
 	init() {
-		this.dp = webix.dp(albumsDB);
 		this.mainLayout = this.$$("mainLayout");
 		this.form = this.$$("form");
 		this.uploader = this.$$("uploader");
@@ -98,8 +96,6 @@ export default class Form extends JetView {
 			this.deletedAlbumsID = deletedAlbums;
 			this.tableData = tableData;
 		});
-
-		this.dp.off();
 
 		this.setInitGroup();
 
@@ -138,10 +134,6 @@ export default class Form extends JetView {
 		}
 	}
 
-	destroy() {
-		albumsDB.load(albumsURL);
-		this.dp.on();
-	}
 
 	enableForm() {
 		this.setFormData();
@@ -233,14 +225,17 @@ export default class Form extends JetView {
 
 	deleteAlbums() {
 		this.deletedAlbumsID.forEach((id) => {
-			albumsDB.remove(id);
+			webix.ajax().del(`${albumsURL}/${id}`);
 		});
 	}
 
 	updateAlbums() {
 		this.updatedAlbumsID.forEach((id) => {
 			const album = this.tableData.getItem(id);
-			albumsDB.updateItem(id, album);
+
+			webix.ajax().headers({
+				"Content-type": "application/json"
+			}).put(`${albumsURL}/${id}`, JSON.stringify(album));
 		});
 	}
 
@@ -276,7 +271,7 @@ export default class Form extends JetView {
 	refreshTableData() {
 		this.tableData.clearAll();
 		this.clearChangedAlbums();
-		albumsDB.load(albumsURL);
+		this.app.callEvent("form:table:refresh", [true]);
 	}
 
 	saveData() {
@@ -289,7 +284,6 @@ export default class Form extends JetView {
 			checkAll
 		} = checkFormChanges;
 
-		this.dp.on();
 
 		if (checkForm) this.updateGroup();
 		if (checkTableDeletes) this.deleteAlbums();
@@ -298,7 +292,6 @@ export default class Form extends JetView {
 
 		this.message(checkAll, "save");
 
-		this.dp.off();
 
 		this.clearChangedAlbums();
 	}

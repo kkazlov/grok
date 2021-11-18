@@ -1,5 +1,4 @@
 import {albumsURL} from "../../config/urls";
-import albumsDB from "../../models/albumsDB";
 import AlbumsTableConstr from "../album-table-constr";
 
 export default class AlbumTable extends AlbumsTableConstr {
@@ -43,15 +42,17 @@ export default class AlbumTable extends AlbumsTableConstr {
 			{updatedAlbums, deletedAlbums},
 			view.data
 		]);
+
+		this.on(this.app, "form:table:refresh", (state) => {
+			if (state) view.load(albumsURL);
+		});
 	}
 
 	urlChange(view) {
 		const groupId = this.getParam("groupId");
 
 		if (groupId) {
-			albumsDB.load(albumsURL);
-
-			view.data.sync(albumsDB, () => {
+			view.load(albumsURL).then(() => {
 				view.filter(obj => obj.GroupID === groupId);
 			});
 		}
