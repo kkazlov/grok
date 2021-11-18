@@ -44,18 +44,19 @@ export default class AlbumTable extends AlbumsTableConstr {
 		]);
 
 		this.on(this.app, "form:table:refresh", (state) => {
-			if (state) view.load(albumsURL);
+			if (state) this.uploadAlbums(view);
 		});
 	}
 
 	urlChange(view) {
-		const groupId = this.getParam("groupId");
+		this.groupId = this.getParam("groupId");
+		if (this.groupId) this.uploadAlbums(view);
+	}
 
-		if (groupId) {
-			view.load(albumsURL).then(() => {
-				view.filter(obj => obj.GroupID === groupId);
-			});
-		}
+	uploadAlbums(view) {
+		view.load(albumsURL).then(() => {
+			view.filter(obj => obj.GroupID === this.groupId);
+		});
 	}
 
 	deleteAlbum(id) {

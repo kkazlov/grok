@@ -1,3 +1,4 @@
+import {albumsURL} from "../../config/urls";
 import albumsDB from "../../models/albumsDB";
 import AlbumsTableConstr from "../album-table-constr";
 
@@ -31,6 +32,8 @@ export default class Table extends AlbumsTableConstr {
 
 	init(view) {
 		super.init(view);
+
+		albumsDB.load(albumsURL);
 
 		this.on(view, "onAfterSelect", (id) => {
 			this.app.callEvent("albums:table:select", [id.id]);
