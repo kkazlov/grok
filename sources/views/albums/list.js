@@ -15,14 +15,29 @@ export default class List extends JetView {
 	init(view) {
 		view.parse(groupsDB);
 
-		groupsDB.waitData.then(() => {
-			const initSelect = view.getFirstId();
-			view.select(initSelect);
-		});
+		groupsDB.waitData.then(() => this.selectFirstGroup(view));
 
 		this.on(view, "onAfterSelect", (id) => {
 			const parentView = this.getParentView();
 			parentView.setParam("groupId", id, true);
 		});
+	}
+
+	urlChange(view, url) {
+		const groupId = url[0].params.groupId;
+
+		groupsDB.waitData.then(() => {
+			const isGroupID = groupsDB.getIndexById(groupId) > -1;
+
+			if (!isGroupID) {
+				view.unselect();
+				this.selectFirstGroup(view);
+			}
+		});
+	}
+
+	selectFirstGroup(view) {
+		const initSelect = view.getFirstId();
+		view.select(initSelect);
 	}
 }
