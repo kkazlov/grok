@@ -2,6 +2,11 @@ import {albumsURL} from "../../config/urls";
 import AlbumsTableConstr from "../album-table-constr";
 
 export default class AlbumTable extends AlbumsTableConstr {
+	constructor(app) {
+		super(app);
+		this.hideSongsCol = true;
+	}
+
 	init(view) {
 		super.init(view);
 
@@ -38,11 +43,6 @@ export default class AlbumTable extends AlbumsTableConstr {
 			}
 		});
 
-		this.app.callEvent("form:table:data", [
-			{updatedAlbums, deletedAlbums},
-			view.data
-		]);
-
 		this.on(this.app, "form:table:refresh", (state) => {
 			if (state) this.uploadAlbums(view);
 		});
@@ -59,9 +59,8 @@ export default class AlbumTable extends AlbumsTableConstr {
 		});
 	}
 
-	deleteAlbum(id) {
-		const table = this.$$("table");
-		table.data.remove(id);
+	deleteAlbum(id, view) {
+		view.data.remove(id);
 	}
 }
 

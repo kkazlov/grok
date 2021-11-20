@@ -4,29 +4,12 @@ import AlbumsTableConstr from "../album-table-constr";
 
 export default class Table extends AlbumsTableConstr {
 	config() {
-		const inheritedCols = super.config().columns;
-
-		const SongsCol = {
-			id: "Songs",
-			header: "Tracks",
-			fillspace: 2,
-			template: obj => obj.TrackList.length
-		};
-
-		const tableCols = [
-			...inheritedCols.slice(0, 2),
-			SongsCol,
-			...inheritedCols.slice(2)
-		];
-
 		return {
 			...super.config(),
 			select: true,
 			editable: true,
 			editaction: "custom",
-			columns: tableCols,
 			gravity: 6
-
 		};
 	}
 
@@ -59,7 +42,7 @@ export default class Table extends AlbumsTableConstr {
 	}
 
 	initSelect(view) {
-		const checkTable = view.data.order.length;
+		const checkTable = view.serialize().length;
 
 		if (checkTable) {
 			const initSelect = view.getFirstId();
@@ -70,9 +53,8 @@ export default class Table extends AlbumsTableConstr {
 		}
 	}
 
-	deleteAlbum(id) {
-		const table = this.$$("table");
+	deleteAlbum(id, view) {
 		albumsDB.remove(id);
-		this.initSelect(table);
+		this.initSelect(view);
 	}
 }

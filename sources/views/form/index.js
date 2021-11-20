@@ -89,6 +89,9 @@ export default class Form extends JetView {
 		const btnsLayout = this.$$("btnsLayout");
 		const checkbox = this.$$("checkbox");
 
+		this.updatedAlbumsID = new Set();
+		this.deletedAlbumsID = new Set();
+		this.tableData = [];
 
 		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
 			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
@@ -176,41 +179,78 @@ export default class Form extends JetView {
 		return {...formValues, CreationDate: dateStr};
 	}
 
+	saveData() {
+		const checkFormChanges = this.checkFormChanges();
+		const {
+			checkGroup,
+			checkTableUpdates,
+			checkTableDeletes,
+			checkFile,
+			checkAll
+		} = checkFormChanges;
+
+
+		if (checkGroup) this.updateGroup();
+		if (checkTableDeletes) this.deleteAlbums();
+		if (checkTableUpdates) this.updateAlbums();
+		if (checkFile) this.sendFile();
+
+		if (!checkAll) webix.message("No Changes. Nothing to save");
+		this.clearChangedAlbums();
+	}
+
+	restoreData() {
+		const checkFormChanges = this.checkFormChanges();
+		const {
+			checkGroup,
+			checkTable,
+			checkFile,
+			checkAll
+		} = checkFormChanges;
+
+		if (checkGroup) this.setFormData();
+		if (checkTable) this.refreshTableData();
+		if (checkFile) this.uploader.files.clearAll();
+
+		if (checkAll) this.message("restore");
+		else webix.message("No Changes. Nothing to restore");
+	}
+
 	checkFormChanges() {
-		const _checkForm = () => {
-			const groupData = groupsDB.getItem(this.groupId);
-			const formData = this.getFormData();
-
-			const dataKeys = Object.keys(formData);
-			let checkForm = false;
-
-			for (let i = 0; i < dataKeys.length; i++) {
-				const key = dataKeys[i];
-				if (formData[key] !== groupData[key]) {
-					checkForm = true;
-					break;
-				}
-			}
-
-			return checkForm;
-		};
-
-		const checkForm = _checkForm();
+		const checkGroup = this.checkGroup();
 		const checkTableUpdates = this.updatedAlbumsID.size;
 		const checkTableDeletes = this.deletedAlbumsID.size;
 		const checkFile = this.uploader.files.data.count();
 
 		const checkTable = checkTableUpdates || checkTableDeletes;
-		const checkAll = checkForm || checkTable || checkFile;
+		const checkAll = checkGroup || checkTable || checkFile;
 
 		return {
-			checkForm,
+			checkGroup,
 			checkTableUpdates,
 			checkTableDeletes,
 			checkTable,
 			checkFile,
 			checkAll
 		};
+	}
+
+	checkGroup() {
+		const groupData = groupsDB.getItem(this.groupId);
+		const formData = this.getFormData();
+
+		const dataKeys = Object.keys(formData);
+		let checkGroup = false;
+
+		for (let i = 0; i < dataKeys.length; i++) {
+			const key = dataKeys[i];
+			if (formData[key] !== groupData[key]) {
+				checkGroup = true;
+				break;
+			}
+		}
+
+		return checkGroup;
 	}
 
 	updateGroup() {
@@ -221,22 +261,53 @@ export default class Form extends JetView {
 
 		groupsDB.updateItem(this.groupId, sendData);
 		this.setFormData();
+		this.message("save");
 	}
 
 	deleteAlbums() {
-		this.deletedAlbumsID.forEach((id) => {
-			webix.ajax().del(`${albumsURL}/${id}`);
-		});
+		try {
+			this.deletedAlbumsID.forEach((id) => {
+				const url = `${albumsURL}/${id}`;
+				webix.ajax()
+					.del(url)
+					.then(() => {
+						this.message("save");
+					})
+					.catch(() => {
+						this.message("error");
+						this.refreshTableData();
+					});
+			});
+		}
+		catch (error) {
+			webix.message(error);
+		}
 	}
 
 	updateAlbums() {
-		this.updatedAlbumsID.forEach((id) => {
-			const album = this.tableData.getItem(id);
+		try {
+			const header = {"Content-type": "application/json"};
 
-			webix.ajax().headers({
-				"Content-type": "application/json"
-			}).put(`${albumsURL}/${id}`, JSON.stringify(album));
-		});
+			this.updatedAlbumsID.forEach((id) => {
+				const album = this.tableData.getItem(id);
+				const albumToJSON = JSON.stringify(album);
+				const url = `${albumsURL}/${id}`;
+
+				webix.ajax()
+					.headers(header)
+					.put(url, albumToJSON)
+					.then(() => {
+						this.message("save");
+					})
+					.catch(() => {
+						this.message("error");
+						this.refreshTableData();
+					});
+			});
+		}
+		catch (error) {
+			webix.message(error);
+		}
 	}
 
 	sendFile() {
@@ -252,15 +323,13 @@ export default class Form extends JetView {
 		});
 	}
 
-	message(check, type) {
-		const ok = type === "save" ? "updated" : "restore";
-		const fail = type === "save" ? "save" : "cancel";
-
-		const message = check ?
-			`The data has been ${ok}` :
-			`No changes. Nothing to ${fail}`;
-
-		webix.message(message);
+	message(type) {
+		const message = {
+			save: "The data has been saved",
+			restore: "The data has been restore",
+			error: "Server Error. The data has not been saved"
+		};
+		webix.message(message[type]);
 	}
 
 	clearChangedAlbums() {
@@ -273,45 +342,6 @@ export default class Form extends JetView {
 		this.clearChangedAlbums();
 		this.app.callEvent("form:table:refresh", [true]);
 	}
-
-	saveData() {
-		const checkFormChanges = this.checkFormChanges();
-		const {
-			checkForm,
-			checkTableUpdates,
-			checkTableDeletes,
-			checkFile,
-			checkAll
-		} = checkFormChanges;
-
-
-		if (checkForm) this.updateGroup();
-		if (checkTableDeletes) this.deleteAlbums();
-		if (checkTableUpdates) this.updateAlbums();
-		if (checkFile) this.sendFile();
-
-		this.message(checkAll, "save");
-
-
-		this.clearChangedAlbums();
-	}
-
-	restoreData() {
-		const checkFormChanges = this.checkFormChanges();
-		const {
-			checkForm,
-			checkTable,
-			checkFile,
-			checkAll
-		} = checkFormChanges;
-
-		if (checkForm) this.setFormData();
-		if (checkTable) this.refreshTableData();
-		if (checkFile) this.uploader.files.clearAll();
-
-		this.message(checkAll, "restore");
-	}
-
 
 	FormElems() {
 		const StyleElem = {

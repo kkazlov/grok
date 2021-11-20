@@ -2,6 +2,11 @@ import {JetView} from "webix-jet";
 
 
 export default class AlbumsTableConstr extends JetView {
+	constructor(app) {
+		super(app);
+		this.hideSongsCol = false;
+	}
+
 	config() {
 		return {
 			view: "datatable",
@@ -38,6 +43,13 @@ export default class AlbumsTableConstr extends JetView {
 					}
 				},
 				{
+					id: "Songs",
+					header: "Tracks",
+					fillspace: 2,
+					template: obj => obj.TrackList.length,
+					hidden: this.hideSongsCol
+				},
+				{
 					id: "CopiesNumber",
 					header: "Issued copies",
 					fillspace: 3,
@@ -53,7 +65,9 @@ export default class AlbumsTableConstr extends JetView {
 			],
 			css: "webix_data_border webix_header_border custom-table",
 			onClick: {
-				deleteIcon: (e, id) => this.deleteIcon(id)
+				deleteIcon(e, id) {
+					this.$scope.deleteIcon(id, this);
+				}
 			}
 		};
 	}
@@ -96,12 +110,12 @@ export default class AlbumsTableConstr extends JetView {
 			webix.rules.isNumber(value);
 	}
 
-	deleteIcon(id) {
+	deleteIcon(id, view) {
 		webix.confirm({
 			title: "Delete",
 			text: "Do you want to delete this record?"
 		}).then(() => {
-			this.deleteAlbum(id);
+			this.deleteAlbum(id, view);
 		});
 	}
 }
