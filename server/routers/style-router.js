@@ -1,18 +1,13 @@
-/* import Router from "express";
+import Router from "express";
 
-import ControllerConstr from "../controllers/controller-constr.js";
-import Style from "../models/style.js";
-import ServicesConstr from "../services/services-constr.js";
+import stylesController from "../controllers/styles-controller.js";
 
-const styleService = new ServicesConstr(Style);
-const styleController = new ControllerConstr(styleService);
 const styleRouter = new Router();
 
-styleRouter.post("/styles", (req, res) => styleController.create(req, res));
-styleRouter.get("/styles", (req, res) => styleController.getAll(req, res));
-styleRouter.get("/styles/:id", (req, res) => styleController.getOne(req, res));
-styleRouter.put("/styles/:id", (req, res) => styleController.update(req, res));
-styleRouter.delete("/styles/:id", (req, res) => styleController.delete(req, res));
+styleRouter.post("/styles", (req, res) => stylesController.create(req, res));
+styleRouter.get("/styles", (req, res) => stylesController.getAll(req, res));
+styleRouter.get("/styles/:id", (req, res) => stylesController.getOne(req, res));
+styleRouter.put("/styles/:id", (req, res) => stylesController.update(req, res));
+styleRouter.delete("/styles/:id", (req, res) => stylesController.delete(req, res));
 
 export default styleRouter;
- */

@@ -1,6 +1,6 @@
 import Member from "../models/member.js";
-import serverFilter from "./server-filter.js";
-import serverSort from "./server-sort.js";
+import serverFilter from "./processing/server-filter.js";
+import serverSort from "./processing/server-sort.js";
 import Services from "./services.js";
 
 
