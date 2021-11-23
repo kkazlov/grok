@@ -1,4 +1,4 @@
-import Router from "express";
+/* import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
 import Files from "../models/files.js";
@@ -15,3 +15,4 @@ filesRouter.put("/files/:id", (req, res) => filesController.update(req, res));
 filesRouter.delete("/files/:id", (req, res) => filesController.deleteWithFile(req, res));
 
 export default filesRouter;
+ */

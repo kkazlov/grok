@@ -1,4 +1,4 @@
-import Router from "express";
+/* import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
 import Style from "../models/style.js";
@@ -15,3 +15,4 @@ styleRouter.put("/styles/:id", (req, res) => styleController.update(req, res));
 styleRouter.delete("/styles/:id", (req, res) => styleController.delete(req, res));
 
 export default styleRouter;
+ */

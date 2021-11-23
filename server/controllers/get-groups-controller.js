@@ -1,6 +1,6 @@
 import Album from "../models/album.js";
 import Group from "../models/group.js";
-import ServicesConstr from "../services/services-constr.js";
+import ServicesConstr from "../services/services.js";
 
 const groupService = new ServicesConstr(Group);
 const albumService = new ServicesConstr(Album);

@@ -1,4 +1,4 @@
-import Router from "express";
+/* import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
 import Album from "../models/album.js";
@@ -15,3 +15,4 @@ albumRouter.put("/albums/:id", (req, res) => albumController.update(req, res));
 albumRouter.delete("/albums/:id", (req, res) => albumController.deleteWithFile(req, res));
 
 export default albumRouter;
+ */

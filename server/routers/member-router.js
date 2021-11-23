@@ -1,4 +1,4 @@
-import Router from "express";
+/* import Router from "express";
 
 import ControllerConstr from "../controllers/controller-constr.js";
 import Member from "../models/member.js"
@@ -15,3 +15,4 @@ memberRouter.put("/members/:id", (req, res) => memberController.update(req, res)
 memberRouter.delete("/members/:id", (req, res) => memberController.delete(req, res));
 
 export default memberRouter;
+ */

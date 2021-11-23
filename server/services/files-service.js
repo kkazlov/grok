@@ -4,15 +4,34 @@ import * as uuid from "uuid";
 
 
 class FileService {
+	async createWithFile(data, files, fileName) {
+		let createdData;
+		if (files) {
+			this.saveFile(files[fileName]);
+			createdData = await this.model.create({...data, [fileName]: this.serverFileName});
+			return createdData;
+		}
+		createdData = await this.model.create(data);
+		return createdData;
+	}
+
+	async deleteWithFile(id) {
+		if (!id) throw new Error("No ID");
+		const selectedData = await this.model.findById(id);
+		this.deleteFile(selectedData.File);
+
+		const data = await this.model.findByIdAndDelete(id);
+		return data;
+	}
+
 	saveFile(file) {
 		try {
 			const fileSplit = file.name.split(".");
 			const fileExt = fileSplit[fileSplit.length - 1];
 
-			const fileName = `${uuid.v4()}.${fileExt}`;
-			const filePath = path.resolve("static", fileName);
+			this.serverFileName = `${uuid.v4()}.${fileExt}`;
+			const filePath = path.resolve("static", this.serverFileName);
 			file.mv(filePath);
-			return fileName;
 		}
 		catch (error) {
 			console.log(error.message);
