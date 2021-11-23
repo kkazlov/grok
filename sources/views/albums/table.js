@@ -16,12 +16,8 @@ export default class Table extends AlbumsTableConstr {
 	init(view) {
 		super.init(view);
 
-		/* albumsDB.load(albumsURL); */
-
 		this.on(view, "onAfterSelect", (id) => {
 			this.app.callEvent("albums:table:select", [id.id]);
-
-
 			view.editCancel();
 		});
 
@@ -35,19 +31,20 @@ export default class Table extends AlbumsTableConstr {
 	}
 
 	urlChange(view) {
-		const GroupID = this.getParam("groupId");
-
-		webix.ajax()
-			.get(albumsURL, {GroupID})
-			.then((res) => {
+		this.GroupID = this.getParam("groupId");
+		if (this.GroupID) {
+			this.loadAlbums().then((albums) => {
 				view.clearAll();
-				view.parse(res.json());
+				view.parse(albums);
+				this.initSelect(view);
 			});
+		}
+	}
 
-		/* view.data.sync(albumsDB, () => {
-			view.filter(obj => obj.GroupID === groupId);
-			this.initSelect(view);
-		}); */
+	async loadAlbums() {
+		const data = await webix.ajax()
+			.get(albumsURL, {GroupID: this.GroupID});
+		return data.json();
 	}
 
 	initSelect(view) {
