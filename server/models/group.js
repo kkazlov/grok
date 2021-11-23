@@ -10,6 +10,7 @@ const Group = new mongoose.Schema({
 	CreationDate: {type: String, required: true},
 	Country: {type: String, required: true},
 	InTour: {type: Number, required: true},
+	Tracks: Number,
 	NearConcert: String,
 	NextConcert: String
 });
