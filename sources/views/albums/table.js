@@ -1,5 +1,5 @@
 import {albumsURL} from "../../config/urls";
-import albumsDB from "../../models/albumsDB";
+/* import albumsDB from "../../models/albumsDB"; */
 import AlbumsTableConstr from "../album-table-constr";
 
 export default class Table extends AlbumsTableConstr {
@@ -16,10 +16,12 @@ export default class Table extends AlbumsTableConstr {
 	init(view) {
 		super.init(view);
 
-		albumsDB.load(albumsURL);
+		/* albumsDB.load(albumsURL); */
 
 		this.on(view, "onAfterSelect", (id) => {
 			this.app.callEvent("albums:table:select", [id.id]);
+
+
 			view.editCancel();
 		});
 
@@ -33,12 +35,19 @@ export default class Table extends AlbumsTableConstr {
 	}
 
 	urlChange(view) {
-		const groupId = this.getParam("groupId");
+		const GroupID = this.getParam("groupId");
 
-		view.data.sync(albumsDB, () => {
+		webix.ajax()
+			.get(albumsURL, {GroupID})
+			.then((res) => {
+				view.clearAll();
+				view.parse(res.json());
+			});
+
+		/* view.data.sync(albumsDB, () => {
 			view.filter(obj => obj.GroupID === groupId);
 			this.initSelect(view);
-		});
+		}); */
 	}
 
 	initSelect(view) {
@@ -54,7 +63,7 @@ export default class Table extends AlbumsTableConstr {
 	}
 
 	deleteAlbum(id, view) {
-		albumsDB.remove(id);
+		/* albumsDB.remove(id); */
 		this.initSelect(view);
 	}
 }
