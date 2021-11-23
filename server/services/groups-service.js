@@ -16,6 +16,8 @@ class GroupsService extends Services {
 		groups.forEach(async ({_id}) => {
 			const groupAlbums = await Album.find({GroupID: _id});
 			const Tracks = groupAlbums.reduce((sum, {TrackList}) => sum + TrackList.length, 0);
+
+			if (!_id) throw new Error("No ID");
 			await this.model.findOneAndUpdate({_id}, {$set: {Tracks}});
 		});
 	}

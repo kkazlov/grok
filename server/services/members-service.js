@@ -1,13 +1,17 @@
+import Member from "../models/member.js";
+import serverFilter from "./server-filter.js";
+import serverSort from "./server-sort.js";
 import Services from "./services.js";
 
-export default class MembersService extends Services {
+
+class MembersService extends Services {
 	async dynamicLoading(req) {
 		const {start = 0, count = 50, filter = {}, sort = {}} = req.query;
 
 		const dbCount = await this.model.count();
 
-		const dataFilter = this.serverFilter(filter);
-		const dataSort = this.serverSort(sort);
+		const dataFilter = serverFilter(filter);
+		const dataSort = serverSort(sort);
 
 		const data = await this.model
 			.find(dataFilter)
@@ -23,30 +27,6 @@ export default class MembersService extends Services {
 			total_count: checkFiler ? data.length : dbCount
 		};
 	}
-
-	serverFilter(filter) {
-		const dataFilter = {};
-		const filterKeys = Object.keys(filter);
-
-		const escapeRegexp = string => string.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-
-		filterKeys.forEach((key) => {
-			if (filter[key]) {
-				dataFilter[key] = new RegExp(escapeRegexp(filter[key]), "i");
-			}
-		});
-		return dataFilter;
-	}
-
-	serverSort(sort) {
-		const dataSort = {};
-		const sortKeys = Object.keys(sort);
-		sortKeys.forEach((key) => {
-			if (sort[key]) {
-				dataSort[key] = sort[key];
-			}
-		});
-
-		return dataSort;
-	}
 }
+
+export default new MembersService(Member);
