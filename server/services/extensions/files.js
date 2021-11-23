@@ -2,8 +2,9 @@ import {unlink} from "fs/promises";
 import path from "path";
 import * as uuid from "uuid";
 
+import Services from "../services.js";
 
-class FileService {
+export default class Files extends Services {
 	async createWithFile(data, files, fileName) {
 		let createdData;
 		if (files) {
@@ -24,14 +25,14 @@ class FileService {
 		return data;
 	}
 
-	saveFile(file) {
+	async saveFile(file) {
 		try {
 			const fileSplit = file.name.split(".");
 			const fileExt = fileSplit[fileSplit.length - 1];
 
 			this.serverFileName = `${uuid.v4()}.${fileExt}`;
 			const filePath = path.resolve("static", this.serverFileName);
-			file.mv(filePath);
+			await file.mv(filePath);
 		}
 		catch (error) {
 			console.log(error.message);
@@ -50,5 +51,3 @@ class FileService {
 		}
 	}
 }
-
-export default new FileService();

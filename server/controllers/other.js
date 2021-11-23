@@ -8,16 +8,6 @@ async createWithFile(req, res) {
 	}
 }
 
-async dynamicLoading(req, res) {
-	try {
-		const data = await this.service.dynamicLoading(req);
-		res.json(data);
-	}
-	catch (error) {
-		res.status(500).json(error.message);
-	}
-}
-
 async deleteWithFile(req, res) {
 	try {
 		const {id} = req.params;

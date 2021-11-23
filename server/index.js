@@ -3,8 +3,9 @@ import express from "express";
 import fileUpload from "express-fileupload";
 import mongoose from "mongoose";
 
-/* import albumRouter from "./routers/album-router.js";
+/*
 import filesRouter from "./routers/files-router.js"; */
+import albumRouter from "./routers/album-router.js";
 import groupRouter from "./routers/group-router.js";
 import memberRouter from "./routers/member-router.js";
 import styleRouter from "./routers/style-router.js";
@@ -22,9 +23,9 @@ app.use(cors());
 app.use("/api", groupRouter);
 app.use("/api", memberRouter);
 app.use("/api", styleRouter);
-/* app.use("/api", albumRouter);
+app.use("/api", albumRouter);
 
-app.use("/api", filesRouter); */
+/* app.use("/api", filesRouter);*/
 
 async function startApp() {
 	try {
