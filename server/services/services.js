@@ -19,6 +19,13 @@ class Services {
 		return data;
 	}
 
+	async getDataForGroup(req) {
+		const {GroupID} = req.query;
+		if (!GroupID) throw new Error("No ID");
+		const data = await this.model.find({GroupID});
+		return data;
+	}
+
 	async update(data) {
 		if (!data._id) throw new Error("No ID");
 		const updatedData = await this.model.findByIdAndUpdate(data._id, data, {

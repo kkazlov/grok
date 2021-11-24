@@ -34,6 +34,16 @@ class Controllers {
 		}
 	}
 
+	async getDataForGroup(req, res) {
+		try {
+			const data = await this.service.getDataForGroup(req);
+			res.json(data);
+		}
+		catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
+
 	async update(req, res) {
 		try {
 			const data = req.body;
