@@ -13,7 +13,10 @@ export default class Form extends JetView {
 			view: "richselect",
 			label: "Group name",
 			options: {
-				body: {template: "#Name#"}
+				body: {
+					save: `json->${groupsURL}`,
+					template: "#Name#"
+				}
 			}
 		};
 
@@ -85,12 +88,12 @@ export default class Form extends JetView {
 		this.form = this.$$("form");
 		this.uploader = this.$$("uploader");
 		this.groupSelector = this.$$("groupSelector");
+		this.groupList = this.groupSelector.getList();
 
 		const concertLayout = this.$$("concertLayout");
 		const btnsLayout = this.$$("btnsLayout");
 		const checkbox = this.$$("checkbox");
 
-		this.groupList = this.groupSelector.getList();
 		this.groupList.load(groupsURL);
 
 		this.disableForm();
@@ -107,7 +110,6 @@ export default class Form extends JetView {
 			if (state) btnsLayout.disable();
 			else btnsLayout.enable();
 		});
-
 
 		this.on(checkbox, "onChange", (value) => {
 			this.checboxValue = value;
@@ -146,22 +148,14 @@ export default class Form extends JetView {
 		this.mainLayout.disable();
 	}
 
-
 	setFormData() {
 		const group = this.groupList.data.getItem(this.GroupID);
 		this.form.setValues(group);
 	}
 
-	getFormData() {
-		const formValues = this.form.getValues();
-		delete formValues.Date;
-
-		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
-		return {...formValues, CreationDate: dateStr};
-	}
-
 	saveData() {
-		const checkFormChanges = this.checkFormChanges();
+		this.updateGroup();
+		/* const checkFormChanges = this.checkFormChanges();
 		const {
 			checkGroup,
 			checkTableUpdates,
@@ -177,7 +171,7 @@ export default class Form extends JetView {
 		if (checkFile) this.sendFile();
 
 		if (!checkAll) webix.message("No Changes. Nothing to save");
-		this.clearChangedAlbums();
+		this.clearChangedAlbums(); */
 	}
 
 	restoreData() {
@@ -217,7 +211,7 @@ export default class Form extends JetView {
 	}
 
 	checkGroup() {
-		const groupData = groupsDB.getItem(this.groupId);
+		const group = this.groupList.data.getItem(this.GroupID);
 		const formData = this.getFormData();
 
 		const dataKeys = Object.keys(formData);
@@ -225,7 +219,7 @@ export default class Form extends JetView {
 
 		for (let i = 0; i < dataKeys.length; i++) {
 			const key = dataKeys[i];
-			if (formData[key] !== groupData[key]) {
+			if (formData[key] !== group[key]) {
 				checkGroup = true;
 				break;
 			}
@@ -240,9 +234,14 @@ export default class Form extends JetView {
 			{...formData, NearConcert: "", NextConcert: ""} :
 			formData;
 
-		groupsDB.updateItem(this.groupId, sendData);
+		this.groupList.data.updateItem(this.GroupID, sendData);
 		this.setFormData();
-		this.message("save");
+	}
+
+	getFormData() {
+		const formValues = this.form.getValues();
+		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
+		return {...formValues, CreationDate: dateStr};
 	}
 
 	deleteAlbums() {
@@ -296,7 +295,7 @@ export default class Form extends JetView {
 			const {file, name, id} = obj;
 
 			obj.formData = {
-				GroupID: this.groupId,
+				GroupID: this.GroupID,
 				File: file,
 				Name: name
 			};
