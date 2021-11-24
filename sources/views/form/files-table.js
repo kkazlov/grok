@@ -1,7 +1,6 @@
 import {JetView} from "webix-jet";
 
 import {filesURL, host} from "../../config/urls";
-import filesDB from "../../models/filesDB";
 
 export default class FilesTable extends JetView {
 	config() {
@@ -38,19 +37,26 @@ export default class FilesTable extends JetView {
 		};
 	}
 
-	urlChange(view) {
-		const groupId = this.getParam("groupId");
-
-		if (groupId) {
-			filesDB.load(filesURL);
-
-			view.data.sync(filesDB, () => {
-				view.filter(obj => obj.GroupID === groupId);
-			});
-		}
+	init(view) {
+		this.table = view;
+		this.on(this.app, "form:richselect:select", (GroupID) => {
+			this.GroupID = GroupID;
+			if (GroupID) {
+				this.loadFiles();
+			}
+		});
 	}
 
-	deleteIcon(e, id) {
+	async loadFiles() {
+		await webix.ajax()
+			.get(filesURL, {GroupID: this.GroupID})
+			.then((files) => {
+				this.table.clearAll();
+				this.table.parse(files);
+			});
+	}
+
+	/* deleteIcon(e, id) {
 		webix
 			.confirm({
 				title: "Delete",
@@ -59,5 +65,5 @@ export default class FilesTable extends JetView {
 			.then(() => {
 				filesDB.remove(id);
 			});
-	}
+	} */
 }

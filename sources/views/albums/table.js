@@ -16,15 +16,15 @@ export default class Table extends AlbumsTableConstr {
 	init(view) {
 		super.init(view);
 
-		this.table = view;
-
 		this.on(this.app, "albums:list:select", (group) => {
 			const {id, Name} = group;
 			this.GroupID = id;
 			this.groupName = Name;
 
 			if (this.GroupID) {
-				this.loadAlbums();
+				this.loadAlbums().then(() => {
+					this.selectFirstAlbum();
+				});
 			}
 		});
 
@@ -42,15 +42,6 @@ export default class Table extends AlbumsTableConstr {
 		});
 	}
 
-	async loadAlbums() {
-		await webix.ajax()
-			.get(albumsURL, {GroupID: this.GroupID})
-			.then((albums) => {
-				this.table.clearAll();
-				this.table.parse(albums);
-				this.selectFirstAlbum();
-			});
-	}
 
 	sendAlbumInfo(albumID) {
 		if (albumID) {

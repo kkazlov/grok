@@ -1,19 +1,20 @@
 import {JetView} from "webix-jet";
 
-import {albumsURL, filesURL} from "../../config/urls";
-import filesDB from "../../models/filesDB";
-import groupsDB from "../../models/groupsDB";
+import {albumsURL, filesURL, groupsURL} from "../../config/urls";
+/* import filesDB from "../../models/filesDB"; */
 import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
 import FilesTable from "./files-table";
 
 export default class Form extends JetView {
 	config() {
-		const GroupElem = {
-			localId: "groupName",
+		const GroupSelector = {
+			localId: "groupSelector",
 			view: "richselect",
 			label: "Group name",
-			options: groupsDB
+			options: {
+				body: {template: "#Name#"}
+			}
 		};
 
 		const CancelBtn = {
@@ -54,7 +55,7 @@ export default class Form extends JetView {
 				NextConcert: value => !this.checboxValue || rule(value)
 			},
 			elements: [
-				GroupElem,
+				GroupSelector,
 				{
 					margin: 30,
 					localId: "mainLayout",
@@ -83,33 +84,30 @@ export default class Form extends JetView {
 		this.mainLayout = this.$$("mainLayout");
 		this.form = this.$$("form");
 		this.uploader = this.$$("uploader");
-		this.groupName = this.$$("groupName");
+		this.groupSelector = this.$$("groupSelector");
 
 		const concertLayout = this.$$("concertLayout");
 		const btnsLayout = this.$$("btnsLayout");
 		const checkbox = this.$$("checkbox");
 
-		this.updatedAlbumsID = new Set();
-		this.deletedAlbumsID = new Set();
-		this.tableData = [];
+		this.groupList = this.groupSelector.getList();
+		this.groupList.load(groupsURL);
 
-		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
-			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
-			this.updatedAlbumsID = updatedAlbums;
-			this.deletedAlbumsID = deletedAlbums;
-			this.tableData = tableData;
+		this.disableForm();
+
+		this.on(this.groupSelector, "onChange", (GroupID) => {
+			this.GroupID = GroupID;
+
+			this.enableForm();
+			this.setFormData();
+			this.app.callEvent("form:richselect:select", [GroupID]);
 		});
-
-		this.setInitGroup();
 
 		this.on(this.app, "form:table:editorState", (state) => {
 			if (state) btnsLayout.disable();
 			else btnsLayout.enable();
 		});
 
-		this.on(this.groupName, "onChange", (value) => {
-			this.setParam("groupId", value, true);
-		});
 
 		this.on(checkbox, "onChange", (value) => {
 			this.checboxValue = value;
@@ -118,57 +116,40 @@ export default class Form extends JetView {
 			else concertLayout.enable();
 		});
 
+
+		/* this.updatedAlbumsID = new Set();
+		this.deletedAlbumsID = new Set();
+		this.tableData = [];
+
+		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
+			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
+			this.updatedAlbumsID = updatedAlbums;
+			this.deletedAlbumsID = deletedAlbums;
+			this.tableData = tableData;
+		}); */
+
+		/*
 		this.on(this.uploader, "onUploadComplete", () => {
 			this.uploader.files.clearAll();
 			filesDB.load(filesURL);
-		});
+		}); */
 	}
-
-	urlChange() {
-		this.groupId = this.getParam("groupId");
-
-		if (this.groupId) {
-			groupsDB.waitData.then(() => {
-				const isGroupID = groupsDB.getIndexById(this.groupId) > -1;
-
-				if (isGroupID) this.enableForm();
-				else this.disableForm();
-			});
-		}
-	}
-
 
 	enableForm() {
-		this.setFormData();
 		this.uploader.files.clearAll();
 		this.mainLayout.enable();
 	}
 
 	disableForm() {
-		this.setParam("groupId", "", true);
 		this.form.clear();
-		this.groupName.setValue("");
+		this.groupSelector.setValue("");
 		this.mainLayout.disable();
 	}
 
-	setInitGroup() {
-		groupsDB.waitData.then(() => {
-			const initGroupId = this.getParam("groupId");
-			const isGroupID = groupsDB.getIndexById(initGroupId) > -1;
-
-			if (isGroupID) this.groupName.setValue(initGroupId);
-			else {
-				this.setParam("groupId", "", true);
-				this.mainLayout.disable();
-			}
-		});
-	}
 
 	setFormData() {
-		groupsDB.waitData.then(() => {
-			const groupValue = groupsDB.getItem(this.groupId);
-			this.form.setValues(groupValue);
-		});
+		const group = this.groupList.data.getItem(this.GroupID);
+		this.form.setValues(group);
 	}
 
 	getFormData() {
@@ -393,7 +374,7 @@ export default class Form extends JetView {
 			localId: "uploader",
 			value: "Add a file",
 			link: "doclist",
-			upload: filesURL,
+			/* upload: filesURL, */
 			multiple: false,
 			autosend: false
 		};

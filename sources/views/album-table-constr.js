@@ -1,5 +1,6 @@
 import {JetView} from "webix-jet";
 
+import {albumsURL} from "../config/urls";
 
 export default class AlbumsTableConstr extends JetView {
 	constructor(app) {
@@ -73,6 +74,8 @@ export default class AlbumsTableConstr extends JetView {
 	}
 
 	init(view) {
+		this.table = view;
+
 		this.on(view, "onBeforeEditStop", (state, editor, ignore) => {
 			const value = editor.getValue();
 			const columnName = editor.column;
@@ -95,6 +98,15 @@ export default class AlbumsTableConstr extends JetView {
 			}
 			return true;
 		});
+	}
+
+	async loadAlbums() {
+		await webix.ajax()
+			.get(albumsURL, {GroupID: this.GroupID})
+			.then((albums) => {
+				this.table.clearAll();
+				this.table.parse(albums);
+			});
 	}
 
 	validRule(value) {
