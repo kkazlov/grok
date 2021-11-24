@@ -1,7 +1,6 @@
 import {JetView} from "webix-jet";
 
 import {groupsURL} from "../../config/urls";
-import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
 import Popup from "./popup";
 
@@ -68,6 +67,7 @@ export default class Groups extends JetView {
 					sort: "string"
 				}
 			],
+			save: `json->${groupsURL}`,
 			scheme: {
 				$change(obj) {
 					obj.Date = webix.Date.strToDate("%Y-%m-%d")(obj.CreationDate);
@@ -80,41 +80,44 @@ export default class Groups extends JetView {
 	}
 
 	init() {
-		/* groupsDB.load(groupsURL); */
 		this._popup = this.ui(Popup);
-		const table = this.$$("table");
+		this.table = this.$$("table");
 
-		table.showOverlay("Loading...");
+		this.loadGroup();
 
-		groupsDB.waitData.then(() => {
-			table.parse(groupsDB);
-			table.hideOverlay();
+		this.on(this.table, "onAfterSelect", ({id}) => {
+			this.groupId = id;
+
+			const group = this.table.data.getItem(id);
+			this._popup.showWindow(group);
 		});
 
-		this.on(table, "onAfterSelect", ({id}) => {
-			this._popup.showWindow(id);
+		this.on(this.table.data, "onDataUpdate", () => {
+			this.table.filterByAll();
 		});
 
-		this.on(groupsDB, "onDataUpdate", () => {
-			table.filterByAll();
-		});
-
-		this.on(table, "onAfterLoad", () => {
-			table.filterByAll();
+		this.on(this.table, "onAfterLoad", () => {
+			this.table.filterByAll();
 		});
 
 		this.on(this.app, "groups:popup:hide", () => {
-			table.clearSelection();
+			this.table.clearSelection();
+		});
+
+		this.on(this.app, "groups:popup:save", (sendObj) => {
+			this.table.data.updateItem(this.groupId, sendObj);
+		});
+	}
+
+	loadGroup() {
+		this.table.showOverlay("Loading...");
+		this.table.load(groupsURL).then(() => {
+			this.table.hideOverlay();
 		});
 	}
 
 	refresh() {
-		const table = this.$$("table");
-		table.clearAll();
-
-		table.showOverlay("Loading...");
-		table.load(groupsURL).then(() => {
-			table.hideOverlay();
-		});
+		this.table.clearAll();
+		this.loadGroup();
 	}
 }

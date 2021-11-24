@@ -1,5 +1,4 @@
 import {albumsURL} from "../../config/urls";
-/* import albumsDB from "../../models/albumsDB"; */
 import AlbumsTableConstr from "../album-table-constr";
 
 export default class Table extends AlbumsTableConstr {

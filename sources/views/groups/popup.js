@@ -1,6 +1,5 @@
 import {JetView} from "webix-jet";
 
-import groupsDB from "../../models/groupsDB";
 import stylesDB from "../../models/stylesDB";
 
 export default class Popup extends JetView {
@@ -91,36 +90,30 @@ export default class Popup extends JetView {
 		};
 	}
 
+	init() {
+		this.form = this.$$("form");
+	}
+
 
 	updateDB() {
-		const form = this.$$("form");
-		const values = form.getValues();
-
+		const values = this.form.getValues();
 		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(values.CreationDate);
 		const sendObj = {...values, CreationDate: dateStr};
 
-		const validation = form.validate();
+		const validation = this.form.validate();
 
 		if (validation) {
-			groupsDB.waitSave(() => {
-				groupsDB.updateItem(this._id, sendObj);
-			});
+			this.app.callEvent("groups:popup:hide");
+			this.app.callEvent("groups:popup:save", [sendObj]);
 
 			this.hideWindow();
 		}
 	}
 
-	showWindow(id) {
-		this._id = id;
-		const form = this.$$("form");
-
-		form.clear();
-		form.clearValidation();
-
-		groupsDB.waitData.then(() => {
-			const values = groupsDB.getItem(id);
-			form.setValues(values);
-		});
+	showWindow(group) {
+		this.form.clear();
+		this.form.clearValidation();
+		this.form.setValues(group);
 
 		this.getRoot().show();
 	}

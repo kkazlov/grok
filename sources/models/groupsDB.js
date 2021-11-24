@@ -1,4 +1,4 @@
-import {groupsURL} from "../config/urls";
+/* import {groupsURL} from "../config/urls";
 
 const groupsDB = new webix.DataCollection({
 	url: groupsURL,
@@ -11,4 +11,4 @@ const groupsDB = new webix.DataCollection({
 	}
 });
 
-export default groupsDB;
+export default groupsDB; */
