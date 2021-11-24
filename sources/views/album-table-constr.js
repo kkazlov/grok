@@ -101,12 +101,13 @@ export default class AlbumsTableConstr extends JetView {
 	}
 
 	async loadAlbums() {
-		await webix.ajax()
-			.get(albumsURL, {GroupID: this.GroupID})
-			.then((albums) => {
-				this.table.clearAll();
-				this.table.parse(albums);
-			});
+		const albums = await webix.ajax().get(albumsURL, {GroupID: this.GroupID});
+		return albums.json();
+	}
+
+	setTableData(albums) {
+		this.table.clearAll();
+		this.table.parse(albums);
 	}
 
 	validRule(value) {
@@ -122,12 +123,12 @@ export default class AlbumsTableConstr extends JetView {
 			webix.rules.isNumber(value);
 	}
 
-	deleteIcon(id, view) {
+	deleteIcon(id) {
 		webix.confirm({
 			title: "Delete",
 			text: "Do you want to delete this record?"
 		}).then(() => {
-			this.deleteAlbum(id, view);
+			this.deleteAlbum(id);
 		});
 	}
 }

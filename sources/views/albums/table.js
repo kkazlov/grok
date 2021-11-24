@@ -22,7 +22,8 @@ export default class Table extends AlbumsTableConstr {
 			this.groupName = Name;
 
 			if (this.GroupID) {
-				this.loadAlbums().then(() => {
+				this.loadAlbums().then((albums) => {
+					this.setTableData(albums);
 					this.selectFirstAlbum();
 				});
 			}

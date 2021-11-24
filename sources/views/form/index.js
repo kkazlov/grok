@@ -1,7 +1,6 @@
 import {JetView} from "webix-jet";
 
 import {albumsURL, filesURL, groupsURL} from "../../config/urls";
-/* import filesDB from "../../models/filesDB"; */
 import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
 import FilesTable from "./files-table";
@@ -39,23 +38,15 @@ export default class Form extends JetView {
 			}
 		};
 
-		const rule = (value) => {
-			const isEmpty = webix.rules.isNotEmpty(value);
-			const isLong = value.toString().length <= 30;
-			const isNotOnlySpace = /\S/g.test(value);
-
-			return isEmpty && isLong && isNotOnlySpace;
-		};
-
 		return {
 			localId: "form",
 			view: "form",
 			margin: 30,
 			elementsConfig: {labelWidth: 150},
 			rules: {
-				Country: value => rule(value),
-				NearConcert: value => !this.checboxValue || rule(value),
-				NextConcert: value => !this.checboxValue || rule(value)
+				Country: value => this.rule(value),
+				NearConcert: value => !this.checboxValue || this.rule(value),
+				NextConcert: value => !this.checboxValue || this.rule(value)
 			},
 			elements: [
 				GroupSelector,
@@ -118,18 +109,6 @@ export default class Form extends JetView {
 			else concertLayout.enable();
 		});
 
-
-		/* this.updatedAlbumsID = new Set();
-		this.deletedAlbumsID = new Set();
-		this.tableData = [];
-
-		this.on(this.app, "form:table:data", (changedAlbumsID, tableData) => {
-			const {updatedAlbums, deletedAlbums} = changedAlbumsID;
-			this.updatedAlbumsID = updatedAlbums;
-			this.deletedAlbumsID = deletedAlbums;
-			this.tableData = tableData;
-		}); */
-
 		/*
 		this.on(this.uploader, "onUploadComplete", () => {
 			this.uploader.files.clearAll();
@@ -184,7 +163,6 @@ export default class Form extends JetView {
 		} = checkFormChanges;
 
 		if (checkGroup) this.setFormData();
-		if (checkTable) this.refreshTableData();
 		if (checkFile) this.uploader.files.clearAll();
 
 		if (checkAll) this.message("restore");
@@ -255,7 +233,6 @@ export default class Form extends JetView {
 					})
 					.catch(() => {
 						this.message("error");
-						this.refreshTableData();
 					});
 			});
 		}
@@ -281,7 +258,6 @@ export default class Form extends JetView {
 					})
 					.catch(() => {
 						this.message("error");
-						this.refreshTableData();
 					});
 			});
 		}
@@ -312,15 +288,12 @@ export default class Form extends JetView {
 		webix.message(message[type]);
 	}
 
-	clearChangedAlbums() {
-		this.deletedAlbumsID.clear();
-		this.updatedAlbumsID.clear();
-	}
+	rule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
 
-	refreshTableData() {
-		this.tableData.clearAll();
-		this.clearChangedAlbums();
-		this.app.callEvent("form:table:refresh", [true]);
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 
 	FormElems() {
@@ -328,7 +301,8 @@ export default class Form extends JetView {
 			view: "combo",
 			label: "Style",
 			options: stylesDB,
-			name: "Style"
+			name: "Style",
+			required: true
 		};
 
 		const CreationDateElem = {
