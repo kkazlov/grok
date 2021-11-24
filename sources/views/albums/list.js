@@ -1,6 +1,6 @@
 import {JetView} from "webix-jet";
 
-import groupsDB from "../../models/groupsDB";
+import {groupsURL} from "../../config/urls";
 
 export default class List extends JetView {
 	config() {
@@ -13,31 +13,14 @@ export default class List extends JetView {
 	}
 
 	init(view) {
-		view.parse(groupsDB);
-
-		groupsDB.waitData.then(() => this.selectFirstGroup(view));
+		view.load(groupsURL).then(() => {
+			const initSelect = view.getFirstId();
+			view.select(initSelect);
+		});
 
 		this.on(view, "onAfterSelect", (id) => {
-			const parentView = this.getParentView();
-			parentView.setParam("groupId", id, true);
+			const group = view.data.getItem(id);
+			this.app.callEvent("albums:list:select", [group]);
 		});
-	}
-
-	urlChange(view, url) {
-		const groupId = url[0].params.groupId;
-
-		groupsDB.waitData.then(() => {
-			const isGroupID = groupsDB.getIndexById(groupId) > -1;
-
-			if (!isGroupID) {
-				view.unselect();
-				this.selectFirstGroup(view);
-			}
-		});
-	}
-
-	selectFirstGroup(view) {
-		const initSelect = view.getFirstId();
-		view.select(initSelect);
 	}
 }

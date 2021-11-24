@@ -8,6 +8,7 @@ export default class Table extends AlbumsTableConstr {
 			select: true,
 			editable: true,
 			editaction: "custom",
+			save: `json->${albumsURL}`,
 			gravity: 6
 		};
 	}
@@ -15,8 +16,20 @@ export default class Table extends AlbumsTableConstr {
 	init(view) {
 		super.init(view);
 
+		this.table = view;
+
+		this.on(this.app, "albums:list:select", (group) => {
+			const {id, Name} = group;
+			this.GroupID = id;
+			this.groupName = Name;
+
+			if (this.GroupID) {
+				this.loadAlbums();
+			}
+		});
+
 		this.on(view, "onAfterSelect", (id) => {
-			this.app.callEvent("albums:table:select", [id.id]);
+			this.sendAlbumInfo(id);
 			view.editCancel();
 		});
 
@@ -25,41 +38,45 @@ export default class Table extends AlbumsTableConstr {
 		});
 
 		this.on(view, "onDataUpdate", (id) => {
-			this.app.callEvent("albums:table:select", [id]);
+			this.sendAlbumInfo(id);
 		});
 	}
 
-	urlChange(view) {
-		this.GroupID = this.getParam("groupId");
-		if (this.GroupID) {
-			this.loadAlbums().then((albums) => {
-				view.clearAll();
-				view.parse(albums);
-				this.initSelect(view);
-			});
-		}
-	}
-
 	async loadAlbums() {
-		const data = await webix.ajax()
-			.get(albumsURL, {GroupID: this.GroupID});
-		return data.json();
+		await webix.ajax()
+			.get(albumsURL, {GroupID: this.GroupID})
+			.then((albums) => {
+				this.table.clearAll();
+				this.table.parse(albums);
+				this.selectFirstAlbum();
+			});
 	}
 
-	initSelect(view) {
-		const checkTable = view.serialize().length;
-
-		if (checkTable) {
-			const initSelect = view.getFirstId();
-			view.select(initSelect);
+	sendAlbumInfo(albumID) {
+		if (albumID) {
+			const album = this.table.data.getItem(albumID);
+			const albumInfo = {...album, groupName: this.groupName};
+			this.app.callEvent("albums:table:select", [albumInfo]);
 		}
 		else {
 			this.app.callEvent("albums:table:select", [null]);
 		}
 	}
 
-	deleteAlbum(id, view) {
-		/* albumsDB.remove(id); */
-		this.initSelect(view);
+	selectFirstAlbum() {
+		const checkTable = this.table.serialize().length;
+
+		if (checkTable) {
+			const initSelect = this.table.getFirstId();
+			this.table.select(initSelect);
+		}
+		else {
+			this.app.callEvent("albums:table:select", [null]);
+		}
+	}
+
+	deleteAlbum(id) {
+		this.table.remove(id);
+		this.selectFirstAlbum();
 	}
 }

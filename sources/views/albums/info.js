@@ -1,6 +1,6 @@
 import {JetView} from "webix-jet";
 
-import {albumsURL, groupsURL, host} from "../../config/urls";
+import {host} from "../../config/urls";
 
 export default class Info extends JetView {
 	config() {
@@ -12,28 +12,12 @@ export default class Info extends JetView {
 	}
 
 	init(view) {
-		this.on(this.app, "albums:table:select", (id) => {
-			const groupId = this.getParam("groupId");
-			this.albumID = id;
-			this.groupID = groupId;
-
-			if (this.albumID) {
-				view.parse(this.loadInfo());
+		this.on(this.app, "albums:table:select", (albumInfo) => {
+			if (albumInfo) {
+				view.parse(albumInfo);
 			}
 			else view.parse({});
 		});
-	}
-
-	async loadInfo() {
-		const fullAlbumURL = `${albumsURL}/${this.albumID}`;
-		const fullGroupURL = `${groupsURL}/${this.groupID}`;
-
-		const album = await webix.ajax().get(fullAlbumURL);
-		const group = await webix.ajax().get(fullGroupURL);
-
-		const groupName = group.json().Name;
-
-		return {...album.json(), groupName};
 	}
 
 	infoTemplate(obj) {
