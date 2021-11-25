@@ -109,11 +109,10 @@ export default class Form extends JetView {
 			else concertLayout.enable();
 		});
 
-		/*
 		this.on(this.uploader, "onUploadComplete", () => {
 			this.uploader.files.clearAll();
-			filesDB.load(filesURL);
-		}); */
+			this.app.callEvent("form:uploader:complete", [true]);
+		});
 	}
 
 	enableForm() {
@@ -135,7 +134,8 @@ export default class Form extends JetView {
 	saveData() {
 		/* this.updateGroup(); */
 		/* this.updateAlbums(); */
-		this.deleteAlbums();
+		/* this.deleteAlbums(); */
+		this.sendFile();
 
 		/* const checkFormChanges = this.checkFormChanges();
 		const {
@@ -339,7 +339,7 @@ export default class Form extends JetView {
 			localId: "uploader",
 			value: "Add a file",
 			link: "doclist",
-			/* upload: filesURL, */
+			upload: filesURL,
 			multiple: false,
 			autosend: false
 		};

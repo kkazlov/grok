@@ -6,6 +6,7 @@ export default class FilesTable extends JetView {
 	config() {
 		return {
 			view: "datatable",
+			save: `json->${filesURL}`,
 			columns: [
 				{id: "Name", header: "File name", fillspace: 8},
 				{
@@ -45,6 +46,12 @@ export default class FilesTable extends JetView {
 				this.loadFiles();
 			}
 		});
+
+		this.on(this.app, "form:uploader:complete", (isComplete) => {
+			if (isComplete) {
+				this.loadFiles();
+			}
+		});
 	}
 
 	async loadFiles() {
@@ -56,14 +63,14 @@ export default class FilesTable extends JetView {
 			});
 	}
 
-	/* deleteIcon(e, id) {
+	deleteIcon(e, id) {
 		webix
 			.confirm({
 				title: "Delete",
 				text: "Do you want to delete this file? WARNING! You will not be able to restore this file!"
 			})
 			.then(() => {
-				filesDB.remove(id);
+				this.table.data.remove(id);
 			});
-	} */
+	}
 }
