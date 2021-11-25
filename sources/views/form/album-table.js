@@ -19,9 +19,21 @@ export default class AlbumTable extends AlbumsTableConstr {
 
 				this.loadAlbums().then((albums) => {
 					this.setTableData(albums);
-					const initAlbums = JSON.parse(JSON.stringify(albums));
-					state.setInit(initAlbums);
 				});
+			}
+		});
+
+		this.on(view, "onAfterLoad", () => {
+			const initAlbums = view.serialize();
+			const copy = JSON.parse(JSON.stringify(initAlbums));
+			state.setInit(copy);
+		});
+
+
+		this.on(this.app, "form:albums:restore", (isRestore) => {
+			if (isRestore) {
+				const initAlbums = state.getState().init;
+				this.setTableData(initAlbums);
 			}
 		});
 

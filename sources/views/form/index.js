@@ -80,6 +80,7 @@ export default class Form extends JetView {
 		this.uploader = this.$$("uploader");
 		this.groupSelector = this.$$("groupSelector");
 		this.groupList = this.groupSelector.getList();
+		this.state = this.app.getService("albumsState");
 
 		const concertLayout = this.$$("concertLayout");
 		const btnsLayout = this.$$("btnsLayout");
@@ -132,62 +133,62 @@ export default class Form extends JetView {
 	}
 
 	saveData() {
-		/* this.updateGroup(); */
-		/* this.updateAlbums(); */
-		/* this.deleteAlbums(); */
-		this.sendFile();
-
-		/* const checkFormChanges = this.checkFormChanges();
+		const checkFormChanges = this.checkFormChanges();
 		const {
-			checkGroup,
-			checkTableUpdates,
-			checkTableDeletes,
-			checkFile,
-			checkAll
+			isGroupChanged,
+			isTableUpdates,
+			isTableDeletes,
+			isFile,
+			areAllChanged
 		} = checkFormChanges;
 
+		if (isGroupChanged) this.updateGroup();
+		if (isTableDeletes) this.deleteAlbums();
+		if (isTableUpdates) this.updateAlbums();
+		if (isFile) this.sendFile();
 
-		if (checkGroup) this.updateGroup();
-		if (checkTableDeletes) this.deleteAlbums();
-		if (checkTableUpdates) this.updateAlbums();
-		if (checkFile) this.sendFile();
+		if (!areAllChanged) console.log('no Changed');
 
-		if (!checkAll) webix.message("No Changes. Nothing to save");
+		this.state.clearChanged();
+
+		/* if (!areAllChanged) webix.message("No Changes. Nothing to save");
 		this.clearChangedAlbums(); */
 	}
 
 	restoreData() {
 		const checkFormChanges = this.checkFormChanges();
 		const {
-			checkGroup,
-			checkTable,
-			checkFile,
-			checkAll
+			isGroupChanged,
+			isTableChanged,
+			isFile,
+			areAllChanged
 		} = checkFormChanges;
 
-		if (checkGroup) this.setFormData();
-		if (checkFile) this.uploader.files.clearAll();
-
-		if (checkAll) this.message("restore");
-		else webix.message("No Changes. Nothing to restore");
+		if (isGroupChanged) this.setFormData();
+		if (isFile) this.uploader.files.clearAll();
+		if (isTableChanged) this.restoreTable();
+		/* if (areAllChanged) this.message("restore");
+		else webix.message("No Changes. Nothing to restore"); */
 	}
 
 	checkFormChanges() {
-		const checkGroup = this.checkGroup();
-		const checkTableUpdates = this.updatedAlbumsID.size;
-		const checkTableDeletes = this.deletedAlbumsID.size;
-		const checkFile = this.uploader.files.data.count();
+		const isGroupChanged = this.checkGroup();
+		const {updated, deleted} = this.state.getState();
 
-		const checkTable = checkTableUpdates || checkTableDeletes;
-		const checkAll = checkGroup || checkTable || checkFile;
+		const isTableUpdates = updated.size;
+		const isTableDeletes = deleted.size;
+		const isFile = this.uploader.files.data.count();
+
+		const isTableChanged = isTableUpdates || isTableDeletes;
+		const areAllChanged = isGroupChanged || isTableChanged || isFile;
 
 		return {
-			checkGroup,
-			checkTableUpdates,
-			checkTableDeletes,
-			checkTable,
-			checkFile,
-			checkAll
+			isGroupChanged,
+			isTableUpdates,
+			isTableDeletes,
+			isTableChanged,
+			isFile,
+			areAllChanged
 		};
 	}
 
@@ -196,17 +197,17 @@ export default class Form extends JetView {
 		const formData = this.getFormData();
 
 		const dataKeys = Object.keys(formData);
-		let checkGroup = false;
+		let isGroupChanged = false;
 
 		for (let i = 0; i < dataKeys.length; i++) {
 			const key = dataKeys[i];
 			if (formData[key] !== group[key]) {
-				checkGroup = true;
+				isGroupChanged = true;
 				break;
 			}
 		}
 
-		return checkGroup;
+		return isGroupChanged;
 	}
 
 	updateGroup() {
@@ -269,6 +270,11 @@ export default class Form extends JetView {
 			};
 			this.uploader.send(id);
 		});
+	}
+
+	restoreTable() {
+		this.state.clearChanged();
+		this.app.callEvent("form:albums:restore", [true]);
 	}
 
 	message(type) {

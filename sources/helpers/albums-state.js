@@ -26,14 +26,16 @@ export default function albumsState(app) {
 		},
 
 		clearState() {
-			const {updated, deleted} = this.state;
-
 			this.state.init = [];
 			this.state.current = [];
+			this.clearChanged();
+		},
+
+		clearChanged() {
+			const {updated, deleted} = this.state;
 			updated.clear();
 			deleted.clear();
 		},
-
 		state: {
 			init: [],
 			current: [],
