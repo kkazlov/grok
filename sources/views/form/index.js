@@ -132,27 +132,31 @@ export default class Form extends JetView {
 		this.form.setValues(group);
 	}
 
-	saveData() {
-		const checkFormChanges = this.checkFormChanges();
-		const {
-			isGroupChanged,
-			isTableUpdates,
-			isTableDeletes,
-			isFile,
-			areAllChanged
-		} = checkFormChanges;
+	async saveData() {
+		try {
+			const checkFormChanges = this.checkFormChanges();
+			const {
+				isGroupChanged,
+				isTableUpdates,
+				isTableDeletes,
+				isFile,
+				areAllChanged
+			} = checkFormChanges;
 
-		if (isGroupChanged) this.updateGroup();
-		if (isTableDeletes) this.deleteAlbums();
-		if (isTableUpdates) this.updateAlbums();
-		if (isFile) this.sendFile();
+			if (isGroupChanged) await this.updateGroup();
+			if (isTableDeletes) await this.deleteAlbums();
+			if (isTableUpdates) await this.updateAlbums();
+			if (isFile) await this.sendFile();
 
-		if (!areAllChanged) console.log('no Changed');
+			if (areAllChanged) this.message("save");
+			else this.message("noSave");
 
-		this.state.clearChanged();
-
-		/* if (!areAllChanged) webix.message("No Changes. Nothing to save");
-		this.clearChangedAlbums(); */
+			this.state.clearChanged();
+		}
+		catch (error) {
+			this.message("error");
+			this.restoreTable();
+		}
 	}
 
 	restoreData() {
@@ -167,8 +171,8 @@ export default class Form extends JetView {
 		if (isGroupChanged) this.setFormData();
 		if (isFile) this.uploader.files.clearAll();
 		if (isTableChanged) this.restoreTable();
-		/* if (areAllChanged) this.message("restore");
-		else webix.message("No Changes. Nothing to restore"); */
+		if (areAllChanged) this.message("restore");
+		else this.message("noRestore");
 	}
 
 	checkFormChanges() {
@@ -210,37 +214,34 @@ export default class Form extends JetView {
 		return isGroupChanged;
 	}
 
-	updateGroup() {
+	async updateGroup() {
 		const formData = this.getFormData();
 		const sendData = !this.checboxValue ?
 			{...formData, NearConcert: "", NextConcert: ""} :
 			formData;
 
-		this.groupList.data.updateItem(this.GroupID, sendData);
+		await this.groupList.data.updateItem(this.GroupID, sendData);
 		this.setFormData();
 	}
 
-	getFormData() {
-		const formValues = this.form.getValues();
-		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
-		return {...formValues, CreationDate: dateStr};
-	}
-
-	deleteAlbums() {
+	async deleteAlbums() {
 		const state = this.app.getService("albumsState");
 		const {deleted} = state.getState();
 		const deletedAblums = Array.from(deleted);
 
 		const header = {"Content-type": "application/json"};
-		const url = `${albumsURL}/deleteMany`;
+		const url = `${albumsURL}/deleteMany765`;
 		const albumsJSON = JSON.stringify(deletedAblums);
 
-		webix.ajax()
+		await webix.ajax()
 			.headers(header)
-			.post(url, albumsJSON);
+			.post(url, albumsJSON)
+			.catch((err) => {
+				throw err;
+			});
 	}
 
-	updateAlbums() {
+	async updateAlbums() {
 		const state = this.app.getService("albumsState");
 		const {current, updated} = state.getState();
 		const changedAblums = [];
@@ -254,13 +255,16 @@ export default class Form extends JetView {
 		const url = `${albumsURL}/updateMany`;
 		const albumsJSON = JSON.stringify(changedAblums);
 
-		webix.ajax()
+		await webix.ajax()
 			.headers(header)
-			.post(url, albumsJSON);
+			.post(url, albumsJSON)
+			.catch((err) => {
+				throw err;
+			});
 	}
 
-	sendFile() {
-		this.uploader.files.data.each((obj) => {
+	async sendFile() {
+		this.uploader.files.data.each(async (obj) => {
 			const {file, name, id} = obj;
 
 			obj.formData = {
@@ -268,8 +272,14 @@ export default class Form extends JetView {
 				File: file,
 				Name: name
 			};
-			this.uploader.send(id);
+			await this.uploader.send(id);
 		});
+	}
+
+	getFormData() {
+		const formValues = this.form.getValues();
+		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(formValues.CreationDate);
+		return {...formValues, CreationDate: dateStr};
 	}
 
 	restoreTable() {
@@ -280,8 +290,10 @@ export default class Form extends JetView {
 	message(type) {
 		const message = {
 			save: "The data has been saved",
-			restore: "The data has been restore",
-			error: "Server Error. The data has not been saved"
+			noSave: "No changes. Nothing to save.",
+			restore: "The data has been restored",
+			noRestore: "No changes. Nothing to restore.",
+			error: "Server Error. The data has not been saved. Try later."
 		};
 		webix.message(message[type]);
 	}
