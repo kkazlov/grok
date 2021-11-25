@@ -4,22 +4,19 @@ import Services from "./services.js";
 
 class GroupsService extends Services {
 	async getAll() {
-		await this.addTracksNumber();
-
-		const data = await this.model.find();
-		return data;
-	}
-
-	async addTracksNumber() {
 		const groups = await this.model.find();
+		const albums = await Album.find();
+		const sendData = [];
 
-		groups.forEach(async ({_id}) => {
-			const groupAlbums = await Album.find({GroupID: _id});
-			const Tracks = groupAlbums.reduce((sum, {TrackList}) => sum + TrackList.length, 0);
-
-			if (!_id) throw new Error("No ID");
-			await this.model.findOneAndUpdate({_id}, {$set: {Tracks}});
+		groups.forEach((group) => {
+			let trackCounter = 0;
+			const groupAlbums = albums.filter(album => album.GroupID === group.id);
+			groupAlbums.forEach((item) => {
+				trackCounter += item.TrackList.length;
+			});
+			sendData.push({...group._doc, Tracks: trackCounter, id: group._id});
 		});
+		return sendData;
 	}
 }
 

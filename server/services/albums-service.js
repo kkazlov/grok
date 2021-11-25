@@ -14,6 +14,17 @@ class AlbumService extends Files {
 
 		return data;
 	}
+
+	async deleteMany(data) {
+		if (!data.length) throw new Error("No data");
+
+		data.forEach(async (id) => {
+			if (!id) throw new Error("No ID");
+			await this.model.findByIdAndDelete(id);
+		});
+
+		return data;
+	}
 }
 
 export default new AlbumService(Album);

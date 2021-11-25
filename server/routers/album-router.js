@@ -9,6 +9,7 @@ albumRouter.get("/albums", (req, res) => albumsController.getDataForGroup(req, r
 albumRouter.get("/albums/:id", (req, res) => albumsController.getOne(req, res));
 albumRouter.put("/albums/:id", (req, res) => albumsController.update(req, res));
 albumRouter.post("/albums/updateMany", (req, res) => albumsController.updateMany(req, res));
+albumRouter.post("/albums/deleteMany", (req, res) => albumsController.deleteMany(req, res));
 albumRouter.delete("/albums/:id", (req, res) => albumsController.deleteWithFile(req, res));
 
 export default albumRouter;

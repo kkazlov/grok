@@ -21,8 +21,9 @@ class Services {
 
 	async getDataForGroup(req) {
 		const {GroupID} = req.query;
-		if (!GroupID) throw new Error("No ID");
-		const data = await this.model.find({GroupID});
+		const data = !GroupID ? await this.model.find() : await this.model.find({GroupID});
+		/* if (!GroupID) throw new Error("No ID"); */
+		/* const data = await this.model.find({GroupID}); */
 		return data;
 	}
 

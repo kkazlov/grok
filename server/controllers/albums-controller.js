@@ -12,6 +12,17 @@ class AlbumsController extends Files {
 			res.status(500).json(error.message);
 		}
 	}
+
+	async deleteMany(req, res) {
+		try {
+			const data = req.body;
+			const deleteMany = await this.service.deleteMany(data);
+			res.json(deleteMany);
+		}
+		catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
 }
 
 export default new AlbumsController(albumsService);

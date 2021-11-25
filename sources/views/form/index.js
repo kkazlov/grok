@@ -134,7 +134,8 @@ export default class Form extends JetView {
 
 	saveData() {
 		/* this.updateGroup(); */
-		this.updateAlbums();
+		/* this.updateAlbums(); */
+		this.deleteAlbums();
 
 		/* const checkFormChanges = this.checkFormChanges();
 		const {
@@ -225,22 +226,17 @@ export default class Form extends JetView {
 	}
 
 	deleteAlbums() {
-		try {
-			this.deletedAlbumsID.forEach((id) => {
-				const url = `${albumsURL}/${id}`;
-				webix.ajax()
-					.del(url)
-					.then(() => {
-						this.message("save");
-					})
-					.catch(() => {
-						this.message("error");
-					});
-			});
-		}
-		catch (error) {
-			webix.message(error);
-		}
+		const state = this.app.getService("albumsState");
+		const {deleted} = state.getState();
+		const deletedAblums = Array.from(deleted);
+
+		const header = {"Content-type": "application/json"};
+		const url = `${albumsURL}/deleteMany`;
+		const albumsJSON = JSON.stringify(deletedAblums);
+
+		webix.ajax()
+			.headers(header)
+			.post(url, albumsJSON);
 	}
 
 	updateAlbums() {
