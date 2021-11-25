@@ -27,6 +27,8 @@ export default class AlbumTable extends AlbumsTableConstr {
 
 		this.on(view.data, "onStoreUpdated", (id, obj, mode) => {
 			if (id) {
+				state.setCurrent(view.serialize());
+
 				if (mode === "update") state.addUpdated(id);
 				if (mode === "delete") state.addDeleted(id.row);
 			}

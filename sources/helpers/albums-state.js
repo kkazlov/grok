@@ -5,34 +5,40 @@ export default function albumsState(app) {
 		},
 
 		setInit(albums) {
-			this.state.initAlbums = albums;
+			this.state.init = albums;
+		},
+
+		setCurrent(albums) {
+			this.state.current = albums;
 		},
 
 		addUpdated(album) {
-			this.state.updatedAlbums.add(album);
+			this.state.updated.add(album);
 		},
 
 		addDeleted(album) {
-			const {updatedAlbums, deletedAlbums} = this.state;
+			const {updated, deleted} = this.state;
 
-			deletedAlbums.add(album);
+			deleted.add(album);
 
-			const isUpdated = updatedAlbums.has(album);
-			if (isUpdated) updatedAlbums.delete(album);
+			const isUpdated = updated.has(album);
+			if (isUpdated) updated.delete(album);
 		},
 
 		clearState() {
-			const {updatedAlbums, deletedAlbums} = this.state;
+			const {updated, deleted} = this.state;
 
-			this.state.initAlbums = [];
-			updatedAlbums.clear();
-			deletedAlbums.clear();
+			this.state.init = [];
+			this.state.current = [];
+			updated.clear();
+			deleted.clear();
 		},
 
 		state: {
-			initAlbums: [],
-			updatedAlbums: new Set(),
-			deletedAlbums: new Set()
+			init: [],
+			current: [],
+			updated: new Set(),
+			deleted: new Set()
 		}
 	};
 	app.setService("albumsState", service);

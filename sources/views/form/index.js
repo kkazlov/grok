@@ -133,7 +133,9 @@ export default class Form extends JetView {
 	}
 
 	saveData() {
-		this.updateGroup();
+		/* this.updateGroup(); */
+		this.updateAlbums();
+
 		/* const checkFormChanges = this.checkFormChanges();
 		const {
 			checkGroup,
@@ -242,28 +244,22 @@ export default class Form extends JetView {
 	}
 
 	updateAlbums() {
-		try {
-			const header = {"Content-type": "application/json"};
+		const state = this.app.getService("albumsState");
+		const {current, updated} = state.getState();
+		const changedAblums = [];
 
-			this.updatedAlbumsID.forEach((id) => {
-				const album = this.tableData.getItem(id);
-				const albumToJSON = JSON.stringify(album);
-				const url = `${albumsURL}/${id}`;
+		updated.forEach((id) => {
+			const findedAlbum = current.find(album => album.id === id);
+			changedAblums.push(findedAlbum);
+		});
 
-				webix.ajax()
-					.headers(header)
-					.put(url, albumToJSON)
-					.then(() => {
-						this.message("save");
-					})
-					.catch(() => {
-						this.message("error");
-					});
-			});
-		}
-		catch (error) {
-			webix.message(error);
-		}
+		const header = {"Content-type": "application/json"};
+		const url = `${albumsURL}/updateMany`;
+		const albumsJSON = JSON.stringify(changedAblums);
+
+		webix.ajax()
+			.headers(header)
+			.post(url, albumsJSON);
 	}
 
 	sendFile() {
