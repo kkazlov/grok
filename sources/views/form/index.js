@@ -1,43 +1,17 @@
 import {JetView} from "webix-jet";
 
-import {albumsURL, filesURL, groupsURL} from "../../config/urls";
+import {
+	albumsDeleteURL,
+	albumsUpdateURL,
+	filesURL,
+	groupsURL
+} from "../../config/urls";
 import stylesDB from "../../models/stylesDB";
 import AlbumTable from "./album-table";
 import FilesTable from "./files-table";
 
 export default class Form extends JetView {
 	config() {
-		const GroupSelector = {
-			localId: "groupSelector",
-			view: "richselect",
-			label: "Group name",
-			options: {
-				body: {
-					save: `json->${groupsURL}`,
-					template: "#Name#"
-				}
-			}
-		};
-
-		const CancelBtn = {
-			view: "button",
-			value: "Cancel",
-			click: () => {
-				this.restoreData();
-				this.form.clearValidation();
-			}
-		};
-
-		const SaveBtn = {
-			view: "button",
-			value: "Save",
-			css: "webix_primary",
-			click: () => {
-				const validation = this.form.validate();
-				if (validation) this.saveData();
-			}
-		};
-
 		return {
 			localId: "form",
 			view: "form",
@@ -48,24 +22,7 @@ export default class Form extends JetView {
 				NearConcert: value => !this.checboxValue || this.rule(value),
 				NextConcert: value => !this.checboxValue || this.rule(value)
 			},
-			elements: [
-				GroupSelector,
-				{
-					margin: 30,
-					localId: "mainLayout",
-					rows: [
-						{
-							margin: 15,
-							cols: [
-								{rows: this.FormElems()},
-								{rows: [AlbumTable, FilesTable]}
-							]
-						},
-						{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
-					]
-				},
-				{}
-			],
+			elements: this.FormUI(),
 			on: {
 				onChange() {
 					this.clearValidation();
@@ -77,9 +34,9 @@ export default class Form extends JetView {
 	init() {
 		this.mainLayout = this.$$("mainLayout");
 		this.form = this.$$("form");
-		this.uploader = this.$$("uploader");
 		this.groupSelector = this.$$("groupSelector");
 		this.groupList = this.groupSelector.getList();
+		this.uploader = this.$$("uploader");
 		this.state = this.app.getService("albumsState");
 
 		const concertLayout = this.$$("concertLayout");
@@ -136,6 +93,7 @@ export default class Form extends JetView {
 		try {
 			const checkFormChanges = this.checkFormChanges();
 			const {
+				isTableChanged,
 				isGroupChanged,
 				isTableUpdates,
 				isTableDeletes,
@@ -143,10 +101,11 @@ export default class Form extends JetView {
 				areAllChanged
 			} = checkFormChanges;
 
-			if (isGroupChanged) await this.updateGroup();
+			if (isGroupChanged) this.updateGroup();
 			if (isTableDeletes) await this.deleteAlbums();
 			if (isTableUpdates) await this.updateAlbums();
-			if (isFile) await this.sendFile();
+			if (isTableChanged) this.state.updateInit();
+			if (isFile) this.sendFile();
 
 			if (areAllChanged) this.message("save");
 			else this.message("noSave");
@@ -171,6 +130,7 @@ export default class Form extends JetView {
 		if (isGroupChanged) this.setFormData();
 		if (isFile) this.uploader.files.clearAll();
 		if (isTableChanged) this.restoreTable();
+
 		if (areAllChanged) this.message("restore");
 		else this.message("noRestore");
 	}
@@ -214,13 +174,13 @@ export default class Form extends JetView {
 		return isGroupChanged;
 	}
 
-	async updateGroup() {
+	updateGroup() {
 		const formData = this.getFormData();
 		const sendData = !this.checboxValue ?
 			{...formData, NearConcert: "", NextConcert: ""} :
 			formData;
 
-		await this.groupList.data.updateItem(this.GroupID, sendData);
+		this.groupList.data.updateItem(this.GroupID, sendData);
 		this.setFormData();
 	}
 
@@ -229,16 +189,7 @@ export default class Form extends JetView {
 		const {deleted} = state.getState();
 		const deletedAblums = Array.from(deleted);
 
-		const header = {"Content-type": "application/json"};
-		const url = `${albumsURL}/deleteMany765`;
-		const albumsJSON = JSON.stringify(deletedAblums);
-
-		await webix.ajax()
-			.headers(header)
-			.post(url, albumsJSON)
-			.catch((err) => {
-				throw err;
-			});
+		await this.sendAlbumsChanges(albumsDeleteURL, deletedAblums);
 	}
 
 	async updateAlbums() {
@@ -251,9 +202,12 @@ export default class Form extends JetView {
 			changedAblums.push(findedAlbum);
 		});
 
+		await this.sendAlbumsChanges(albumsUpdateURL, changedAblums);
+	}
+
+	async sendAlbumsChanges(url, albums) {
 		const header = {"Content-type": "application/json"};
-		const url = `${albumsURL}/updateMany`;
-		const albumsJSON = JSON.stringify(changedAblums);
+		const albumsJSON = JSON.stringify(albums);
 
 		await webix.ajax()
 			.headers(header)
@@ -263,7 +217,7 @@ export default class Form extends JetView {
 			});
 	}
 
-	async sendFile() {
+	sendFile() {
 		this.uploader.files.data.each(async (obj) => {
 			const {file, name, id} = obj;
 
@@ -272,7 +226,7 @@ export default class Form extends JetView {
 				File: file,
 				Name: name
 			};
-			await this.uploader.send(id);
+			this.uploader.send(id);
 		});
 	}
 
@@ -298,12 +252,56 @@ export default class Form extends JetView {
 		webix.message(message[type]);
 	}
 
-	rule(value) {
-		const isEmpty = webix.rules.isNotEmpty(value);
-		const isLong = value.toString().length <= 30;
-		const isNotOnlySpace = /\S/g.test(value);
+	FormUI() {
+		const GroupSelector = {
+			localId: "groupSelector",
+			view: "richselect",
+			label: "Group name",
+			options: {
+				body: {
+					save: `json->${groupsURL}`,
+					template: "#Name#"
+				}
+			}
+		};
 
-		return isEmpty && isLong && isNotOnlySpace;
+		const CancelBtn = {
+			view: "button",
+			value: "Cancel",
+			click: () => {
+				this.restoreData();
+				this.form.clearValidation();
+			}
+		};
+
+		const SaveBtn = {
+			view: "button",
+			value: "Save",
+			css: "webix_primary",
+			click: () => {
+				const validation = this.form.validate();
+				if (validation) this.saveData();
+			}
+		};
+
+		return [
+			GroupSelector,
+			{
+				margin: 30,
+				localId: "mainLayout",
+				rows: [
+					{
+						margin: 15,
+						cols: [
+							{rows: this.FormElems()},
+							{rows: [AlbumTable, FilesTable]}
+						]
+					},
+					{localId: "btnsLayout", rows: [CancelBtn, SaveBtn]}
+				]
+			},
+			{}
+		];
 	}
 
 	FormElems() {
@@ -382,5 +380,13 @@ export default class Form extends JetView {
 			UploaderElem,
 			UploaderListElem
 		];
+	}
+
+	rule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 }

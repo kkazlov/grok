@@ -5,7 +5,13 @@ export default function albumsState(app) {
 		},
 
 		setInit(albums) {
-			this.state.init = albums;
+			const copy = JSON.parse(JSON.stringify(albums));
+			this.state.init = copy;
+		},
+
+		updateInit() {
+			const {current} = this.state;
+			this.setInit(current);
 		},
 
 		setCurrent(albums) {

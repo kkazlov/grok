@@ -25,8 +25,7 @@ export default class AlbumTable extends AlbumsTableConstr {
 
 		this.on(view, "onAfterLoad", () => {
 			const initAlbums = view.serialize();
-			const copy = JSON.parse(JSON.stringify(initAlbums));
-			state.setInit(copy);
+			state.setInit(initAlbums);
 		});
 
 

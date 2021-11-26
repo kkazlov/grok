@@ -9,6 +9,8 @@ const filesAPI = process.env.FILES_API;
 const groupsURL = `${host}${groupsAPI}`;
 const membersURL = `${host}${membersAPI}`;
 const albumsURL = `${host}${albumsAPI}`;
+const albumsUpdateURL = `${albumsURL}/updateMany`;
+const albumsDeleteURL = `${albumsURL}/deleteMany`;
 const stylesURL = `${host}${stylesAPI}`;
 const filesURL = `${host}${filesAPI}`;
 
@@ -16,6 +18,8 @@ export {
 	groupsURL,
 	membersURL,
 	albumsURL,
+	albumsUpdateURL,
+	albumsDeleteURL,
 	stylesURL,
 	filesURL,
 	host
