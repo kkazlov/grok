@@ -24,6 +24,7 @@ export default class Table extends AlbumsTableConstr {
 				this.groupName = Name;
 
 				if (this.GroupID) {
+					this.table.showOverlay("Loading...");
 					this.loadAlbums().then((albums) => {
 						this.table.hideOverlay();
 						this.table.parse(albums);
