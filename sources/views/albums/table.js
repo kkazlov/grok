@@ -26,7 +26,7 @@ export default class Table extends AlbumsTableConstr {
 				if (this.GroupID) {
 					this.loadAlbums().then((albums) => {
 						this.table.hideOverlay();
-						this.setTableData(albums);
+						this.table.parse(albums);
 						this.selectFirstAlbum();
 					});
 				}

@@ -114,7 +114,7 @@ export default class Form extends JetView {
 		}
 		catch (error) {
 			this.message("error");
-			this.restoreTable();
+			this.restoreTable(error);
 		}
 	}
 
@@ -236,9 +236,9 @@ export default class Form extends JetView {
 		return {...formValues, CreationDate: dateStr};
 	}
 
-	restoreTable() {
+	restoreTable(error) {
 		this.state.clearChanged();
-		this.app.callEvent("form:albums:restore", [true]);
+		this.app.callEvent("form:albums:restore", [true, error]);
 	}
 
 	message(type) {

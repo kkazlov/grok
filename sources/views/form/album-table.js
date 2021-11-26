@@ -20,7 +20,7 @@ export default class AlbumTable extends AlbumsTableConstr {
 					this.table.showOverlay("Loading...");
 					this.loadAlbums().then((albums) => {
 						this.table.hideOverlay();
-						this.setTableData(albums);
+						this.table.parse(albums);
 					});
 				}
 			}
@@ -35,10 +35,14 @@ export default class AlbumTable extends AlbumsTableConstr {
 		});
 
 
-		this.on(this.app, "form:albums:restore", (isRestore) => {
-			if (isRestore) {
+		this.on(this.app, "form:albums:restore", (isRestore, error) => {
+			if (isRestore && !error) {
 				const initAlbums = state.getState().init;
-				this.setTableData(initAlbums);
+				this.table.parse(initAlbums);
+			}
+			if (error) {
+				this.table.clearAll();
+				this.table.showOverlay("Server Error. Try later.");
 			}
 		});
 

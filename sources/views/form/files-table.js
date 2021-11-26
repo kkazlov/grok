@@ -56,10 +56,12 @@ export default class FilesTable extends JetView {
 
 	async loadFiles() {
 		try {
+			this.table.clearAll();
+			this.table.showOverlay("Loading...");
 			await webix.ajax()
 				.get(filesURL, {GroupID: this.GroupID})
 				.then((files) => {
-					this.table.clearAll();
+					this.table.hideOverlay();
 					this.table.parse(files);
 				});
 		}
