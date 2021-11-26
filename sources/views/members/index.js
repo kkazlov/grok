@@ -9,7 +9,7 @@ export default class Members extends JetView {
 			editable: true,
 			save: `json->${membersURL}`,
 			rules: {
-				$all: value => webix.rules.isNotEmpty(value) && value.toString().length <= 30
+				$all: value => this.rule(value)
 			},
 			columns: [
 				{
@@ -107,5 +107,13 @@ export default class Members extends JetView {
 		this.on(view, "onDataRequest", () => {
 			view.editCancel();
 		});
+	}
+
+	rule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 }
