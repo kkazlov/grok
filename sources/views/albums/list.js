@@ -13,10 +13,15 @@ export default class List extends JetView {
 	}
 
 	init(view) {
-		view.load(groupsURL).then(() => {
-			const initSelect = view.getFirstId();
-			view.select(initSelect);
-		});
+		try {
+			view.load(groupsURL).then(() => {
+				const initSelect = view.getFirstId();
+				view.select(initSelect);
+			});
+		}
+		catch (error) {
+			webix.message("Server Error. Try later.");
+		}
 
 		this.on(view, "onAfterSelect", (id) => {
 			const group = view.data.getItem(id);

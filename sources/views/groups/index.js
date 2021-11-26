@@ -109,11 +109,16 @@ export default class Groups extends JetView {
 		});
 	}
 
-	loadGroup() {
-		this.table.showOverlay("Loading...");
-		this.table.load(groupsURL).then(() => {
-			this.table.hideOverlay();
-		});
+	async loadGroup() {
+		try {
+			this.table.showOverlay("Loading...");
+			await this.table.load(groupsURL).then(() => {
+				this.table.hideOverlay();
+			});
+		}
+		catch (error) {
+			this.table.showOverlay("Server Error. Try later.");
+		}
 	}
 
 	refresh() {

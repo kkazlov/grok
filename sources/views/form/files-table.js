@@ -55,12 +55,17 @@ export default class FilesTable extends JetView {
 	}
 
 	async loadFiles() {
-		await webix.ajax()
-			.get(filesURL, {GroupID: this.GroupID})
-			.then((files) => {
-				this.table.clearAll();
-				this.table.parse(files);
-			});
+		try {
+			await webix.ajax()
+				.get(filesURL, {GroupID: this.GroupID})
+				.then((files) => {
+					this.table.clearAll();
+					this.table.parse(files);
+				});
+		}
+		catch (error) {
+			this.table.showOverlay("Server Error. Try later.");
+		}
 	}
 
 	deleteIcon(e, id) {

@@ -12,14 +12,20 @@ export default class AlbumTable extends AlbumsTableConstr {
 		const state = this.app.getService("albumsState");
 
 		this.on(this.app, "form:richselect:select", (GroupID) => {
-			this.GroupID = GroupID;
+			try {
+				this.GroupID = GroupID;
 
-			if (GroupID) {
-				state.clearState();
-
-				this.loadAlbums().then((albums) => {
-					this.setTableData(albums);
-				});
+				if (GroupID) {
+					state.clearState();
+					this.table.showOverlay("Loading...");
+					this.loadAlbums().then((albums) => {
+						this.table.hideOverlay();
+						this.setTableData(albums);
+					});
+				}
+			}
+			catch (error) {
+				this.table.showOverlay("Server Error. Try later.");
 			}
 		});
 
