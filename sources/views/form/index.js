@@ -218,7 +218,7 @@ export default class Form extends JetView {
 	}
 
 	sendFile() {
-		this.uploader.files.data.each(async (obj) => {
+		this.uploader.files.data.each((obj) => {
 			const {file, name, id} = obj;
 
 			obj.formData = {

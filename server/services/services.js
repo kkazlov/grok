@@ -4,8 +4,8 @@ class Services {
 	}
 
 	async create(data) {
-		const createdGroup = await this.model.create(data);
-		return createdGroup;
+		const createdData = await this.model.create(data);
+		return createdData;
 	}
 
 	async getAll() {
@@ -22,8 +22,6 @@ class Services {
 	async getDataForGroup(req) {
 		const {GroupID} = req.query;
 		const data = !GroupID ? await this.model.find() : await this.model.find({GroupID});
-		/* if (!GroupID) throw new Error("No ID"); */
-		/* const data = await this.model.find({GroupID}); */
 		return data;
 	}
 

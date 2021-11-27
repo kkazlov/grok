@@ -58,12 +58,12 @@ export default class FilesTable extends JetView {
 		try {
 			this.table.clearAll();
 			this.table.showOverlay("Loading...");
-			await webix.ajax()
-				.get(filesURL, {GroupID: this.GroupID})
-				.then((files) => {
-					this.table.hideOverlay();
-					this.table.parse(files);
-				});
+
+			const files = await webix.ajax()
+				.get(filesURL, {GroupID: this.GroupID});
+
+			this.table.hideOverlay();
+			this.table.parse(files);
 		}
 		catch (error) {
 			this.table.showOverlay("Server Error. Try later.");
