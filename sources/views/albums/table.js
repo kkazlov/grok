@@ -17,23 +17,18 @@ export default class Table extends AlbumsTableConstr {
 		super.init(view);
 		this.table.showOverlay("Loading...");
 
-		this.on(this.app, "albums:list:select", (group) => {
-			try {
-				const {id, Name} = group;
-				this.GroupID = id;
-				this.groupName = Name;
+		this.on(this.app, "albums:list:select", async (group) => {
+			const {id, Name} = group;
+			this.GroupID = id;
+			this.groupName = Name;
 
-				if (this.GroupID) {
-					this.table.showOverlay("Loading...");
-					this.loadAlbums().then((albums) => {
-						this.table.hideOverlay();
-						this.table.parse(albums);
-						this.selectFirstAlbum();
-					});
-				}
-			}
-			catch (error) {
-				this.table.showOverlay("Server Error. Try later.");
+			if (this.GroupID) {
+				this.table.showOverlay("Loading...");
+
+				const albums = await this.loadAlbums();
+				this.table.hideOverlay();
+				this.table.parse(albums);
+				this.selectFirstAlbum();
 			}
 		});
 

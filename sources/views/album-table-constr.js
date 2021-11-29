@@ -101,9 +101,15 @@ export default class AlbumsTableConstr extends JetView {
 	}
 
 	async loadAlbums() {
-		this.table.clearAll();
-		const albums = await webix.ajax().get(albumsURL, {GroupID: this.GroupID});
-		return albums.json();
+		try {
+			this.table.clearAll();
+			const albums = await webix.ajax().get(albumsURL, {GroupID: this.GroupID});
+			return albums.json();
+		}
+		catch (error) {
+			this.table.showOverlay("Server Error. Try later.");
+			return {};
+		}
 	}
 
 	validRule(value) {

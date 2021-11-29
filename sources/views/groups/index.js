@@ -109,10 +109,10 @@ export default class Groups extends JetView {
 		});
 	}
 
-	async loadGroup() {
+	loadGroup() {
 		try {
 			this.table.showOverlay("Loading...");
-			await this.table.load(groupsURL).then(() => {
+			this.table.load(groupsURL).then(() => {
 				this.table.hideOverlay();
 			});
 		}
