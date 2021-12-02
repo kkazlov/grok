@@ -1,0 +1,26 @@
+.info__header h2, h3 {
+	margin: 0 0 10px;
+	line-height: 1.2;
+}
+
+.info__photo {
+	margin: 10px 0;
+	max-width: 150px;
+}
+
+.info__photo img {
+	width: 100%;
+}
+
+.info__tracklist h4 {
+	margin: 0 5px;
+}
+
+.info__tracklist ol {
+	padding: 0;
+	margin-left: 30px;
+}
+
+.info__awards span {
+	font-weight: bold;
+}

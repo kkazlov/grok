@@ -1,7 +1,3 @@
-/* .table-custom [aria-rowindex]:nth-child(odd) {
-	background: #f0f0f0;
-}
-
 .table-icon {
 	text-align: center;
 }
@@ -9,8 +5,12 @@
 .table-icon span {
 	cursor: pointer;
 
-} */
+}
 
 .webix_cell {
 	text-overflow: ellipsis;
+}
+
+.custom-table .webix_cell {
+	cursor: pointer;
 }

@@ -1,6 +1,6 @@
 import {JetView} from "webix-jet";
 
-import groupsDB from "../../models/groupsDB";
+import stylesDB from "../../models/stylesDB";
 
 export default class Popup extends JetView {
 	config() {
@@ -12,9 +12,10 @@ export default class Popup extends JetView {
 		};
 
 		const style = {
-			view: "text",
+			view: "combo",
 			label: "Music Style",
 			name: "Style",
+			options: stylesDB,
 			required: true
 		};
 
@@ -72,9 +73,9 @@ export default class Popup extends JetView {
 					{margin: 10, cols: [{}, actionBtn, cancelBtn]}
 				],
 				rules: {
-					Name: value => value.length <= 30,
-					Style: value => value.length <= 30,
-					Country: value => value.length <= 30
+					Name: value => this.validRule(value),
+					Style: value => this.validRule(value),
+					Country: value => this.validRule(value)
 				},
 				elementsConfig: {
 					labelWidth: 120,
@@ -89,36 +90,30 @@ export default class Popup extends JetView {
 		};
 	}
 
+	init() {
+		this.form = this.$$("form");
+	}
+
 
 	updateDB() {
-		const form = this.$$("form");
-		const values = form.getValues();
-
+		const values = this.form.getValues();
 		const dateStr = webix.Date.dateToStr("%Y-%m-%d")(values.CreationDate);
 		const sendObj = {...values, CreationDate: dateStr};
 
-		const validation = form.validate();
+		const validation = this.form.validate();
 
 		if (validation) {
-			groupsDB.waitSave(() => {
-				groupsDB.updateItem(this._id, sendObj);
-			});
+			this.app.callEvent("groups:popup:hide");
+			this.app.callEvent("groups:popup:save", [sendObj]);
 
 			this.hideWindow();
 		}
 	}
 
-	showWindow(id) {
-		this._id = id;
-		const form = this.$$("form");
-
-		form.clear();
-		form.clearValidation();
-
-		groupsDB.waitData.then(() => {
-			const values = groupsDB.getItem(id);
-			form.setValues(values);
-		});
+	showWindow(group) {
+		this.form.clear();
+		this.form.clearValidation();
+		this.form.setValues(group);
 
 		this.getRoot().show();
 	}
@@ -126,6 +121,14 @@ export default class Popup extends JetView {
 	hideWindow() {
 		this.$$("window").hide();
 		this.app.callEvent("groups:popup:hide");
+	}
+
+	validRule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 }
 

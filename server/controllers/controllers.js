@@ -1,4 +1,4 @@
-class ControllerConstr {
+class Controllers {
 	constructor(service) {
 		this.service = service;
 	}
@@ -6,16 +6,6 @@ class ControllerConstr {
 	async create(req, res) {
 		try {
 			const data = await this.service.create(req.body);
-			res.json(data);
-		}
-		catch (error) {
-			res.status(500).json(error.message);
-		}
-	}
-
-	async createWithFile(req, res) {
-		try {
-			const data = await this.service.createWithFile(req.body, req.files, "Photo");
 			res.json(data);
 		}
 		catch (error) {
@@ -33,9 +23,10 @@ class ControllerConstr {
 		}
 	}
 
-	async dynamicLoading(req, res) {
+	async getOne(req, res) {
 		try {
-			const data = await this.service.dynamicLoading(req);
+			const {id} = req.params;
+			const data = await this.service.getOne(id);
 			res.json(data);
 		}
 		catch (error) {
@@ -43,10 +34,9 @@ class ControllerConstr {
 		}
 	}
 
-	async getOne(req, res) {
+	async getDataForGroup(req, res) {
 		try {
-			const {id} = req.params;
-			const data = await this.service.getOne(id);
+			const data = await this.service.getDataForGroup(req);
 			res.json(data);
 		}
 		catch (error) {
@@ -75,17 +65,6 @@ class ControllerConstr {
 			res.status(500).json(error.message);
 		}
 	}
-
-	async deleteWithFile(req, res) {
-		try {
-			const {id} = req.params;
-			const data = await this.service.deleteWithFile(id);
-			res.json(data);
-		}
-		catch (error) {
-			res.status(500).json(error.message);
-		}
-	}
 }
 
-export default ControllerConstr;
+export default Controllers;

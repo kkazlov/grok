@@ -1,9 +1,14 @@
-Webix Jet Demo App
+Grok app
 ===================
 
-### How to run
-
+### How to run server:
+- run ```cd server```
 - run ```npm install```
+- run ```npm start```
+
+### How to run client:
+- run ```npm install```
+- Make ```.env``` from ```.env.example```
 - run ```npm start```
 - open ```http://localhost:8080```
 

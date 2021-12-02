@@ -8,9 +8,8 @@ export default class Members extends JetView {
 			view: "datatable",
 			editable: true,
 			save: `json->${membersURL}`,
-			url: membersURL,
 			rules: {
-				$all: value => webix.rules.isNotEmpty(value) && value.toString().length <= 30
+				$all: value => this.rule(value)
 			},
 			columns: [
 				{
@@ -61,6 +60,16 @@ export default class Members extends JetView {
 	init(view) {
 		let filtersValue = {};
 
+		try {
+			view.showOverlay("Loading...");
+			view.load(membersURL).then(() => {
+				view.hideOverlay();
+			});
+		}
+		catch (error) {
+			this.table.showOverlay("Server Error. Try later.");
+		}
+
 		const findValue = (obj, value) => {
 			const objLow = obj.toString().toLowerCase();
 			const valueLow = value.toString().toLowerCase();
@@ -98,5 +107,13 @@ export default class Members extends JetView {
 		this.on(view, "onDataRequest", () => {
 			view.editCancel();
 		});
+	}
+
+	rule(value) {
+		const isEmpty = webix.rules.isNotEmpty(value);
+		const isLong = value.toString().length <= 30;
+		const isNotOnlySpace = /\S/g.test(value);
+
+		return isEmpty && isLong && isNotOnlySpace;
 	}
 }
